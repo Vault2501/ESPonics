@@ -4,14 +4,17 @@
 #include <Wire.h>
 #include <ArduinoOTA.h>
 #include <TaskScheduler.h>
-#include "ArduinoJson.h"
+#include <UnitecRCSwitch.h>
+#include <ArduinoJson.h>
 #include <Preferences.h>
 #include "wifi.h"
 #include "index.h"
 
 #define DEBUG 1
 
-const char* myhostname = "esp01geiger";
+
+
+const char* myhostname = "esponics";
 const char* ssid = APSSID;
 const char* key =  APKEY;
 
@@ -21,6 +24,7 @@ bool valve1_state=1;
 bool valve2_state=1;
 bool fan1_state=1;
 bool fan2_state=1;
+bool light_state=1;
 int active_pump=1;
 bool scheduler_active=1;
 
@@ -88,6 +92,9 @@ void notifyClients() {
                \n\t\"pump2_state\": \"" + String(pump2_state) + "\",\
                \n\t\"valve1_state\": \"" + String(valve1_state) +"\",\
                \n\t\"valve2_state\": \"" + String(valve2_state) +"\",\
+               \n\t\"fan1_state\": \"" + String(fan1_state) +"\",\
+               \n\t\"fan2_state\": \"" + String(fan2_state) +"\",\
+               \n\t\"light_state\": \"" + String(light_state) +"\",\
                \n\t\"scheduler_active\": \"" + String(scheduler_active) +"\",\ 
                \n\t\"flow_rate\": \"" + String(flowRate) +"\",\
                \n\t\"flow_quantity\": \"" + String(totalMilliLitres) +"\",\
@@ -145,6 +152,19 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       }
       if (strcmp(command_item, "scheduler") == 0) {
         scheduler_active = !scheduler_active;
+        notifyClients();
+      }
+      if (strcmp(command_item, "fan1") == 0) {
+        fan1_state = !fan1_state;
+        notifyClients();
+      }
+      if (strcmp(command_item, "fan2") == 0) {
+        fan2_state = !fan2_state;
+        notifyClients();
+      }
+      if (strcmp(command_item, "light") == 0) {
+        light_state = !light_state;
+        scheduler_active = 0;
         notifyClients();
       }
     }
@@ -221,7 +241,16 @@ String processor(const String& var){
   }
   else if(var == "SPRAY_DURATION"){
     return String(spray_duration);
+  }
+  else if(var == "FAN1_STATE"){
+    return String(fan1_state);
   }  
+  else if(var == "FAN2_STATE"){
+    return String(fan2_state);
+  }
+  else if(var == "LIGHT_STATE"){
+    return String(light_state);
+  }
   else {
     Serial.println("template: Unknown variable");
     return String("Unknown variable");
@@ -273,6 +302,45 @@ void setValveState() {
   digitalWrite(valve2_pin, valve2_state);  
 }
 
+//////////////////////////////////////////////
+/// Fans
+
+void setFanState()
+{
+  digitalWrite(fan1_pin,fan1_state);
+  digitalWrite(fan2_pin,fan2_state);
+}
+
+//////////////////////////////////////////////
+/// Light
+
+UnitecRCSwitch mySwitch;
+
+UnitecRCSwitch::ButtonCodes codes = {
+ {13721648, 14595904, 13946480, 14372784}, // Button A ON codes
+ {13806992, 13996448, 14506528, 13831184}, // Button A OFF codes
+ {14372788, 13946484, 14595908, 13721652}, // Button B ON codes
+ {13831188, 14506532, 13996452, 13806996}, // Button B OFF codes
+ {14595916, 13721660, 14372796, 13946492}, // Button C ON codes
+ {13996460, 13807004, 13831196, 14506540}, // Button C OFF codes
+ {13806994, 13996450, 14506530, 13831186}, // Button D ON codes
+ {13721650, 14595906, 13946482, 14372786}, // Button D OFF codes
+};
+
+void setLightState()
+{
+  if (light_state == 1)
+  {
+    // Turn light off
+    mySwitch.switchOff(UnitecRCSwitch::SOCKET_A);
+  }
+
+  if (light_state == 0)
+  {
+    // Turn light on
+    mySwitch.switchOff(UnitecRCSwitch::SOCKET_A);
+  }
+}
 
 //////////////////////////////////////////////
 /// Flow Rate
@@ -376,40 +444,66 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Starting");
 
+  // initialize pump pins
   pinMode(pump1_pin, OUTPUT);
   digitalWrite(pump1_pin, LOW);
   pinMode(pump2_pin, OUTPUT);
   digitalWrite(pump2_pin, LOW);
+
+  // initialize valve pins
   pinMode(valve1_pin, OUTPUT);
   digitalWrite(valve1_pin, LOW);
   pinMode(valve2_pin, OUTPUT);
   digitalWrite(valve2_pin, LOW);
+
+  // initialize flow pin
   pinMode(flow_pin, INPUT_PULLUP);
 
+  // initialize fan pins
+  pinMode(fan1_pin, OUTPUT);
+  digitalWrite(fan1_pin, LOW);
+  pinMode(fan2_pin, OUTPUT);
+  digitalWrite(fan2_pin,LOW);
+
+  // initialize rf pins
+  pinMode(rf_pin,OUTPUT);
+  digitalWrite(rf_pin,LOW);
+
+  // button setup for rf switch
+  mySwitch.setBtnCodes(&codes);
+  mySwitch.enableTransmit(27);
+
+  // initialize variables for flow meter and attach flow pin to interrupt handler
   pulseCount = 0;
   flowRate = 0.0;
   flowMilliLitres = 0;
   totalMilliLitres = 0;
   previousMillis = 0;
-
   attachInterrupt(digitalPinToInterrupt(flow_pin), pulseCounter, FALLING);
 
+  // setup WiFiManager and OTA updates
   setupWiFiManager();  
   setupOTA();
 
+  // configure preferences strcture for persistent saving
   preferences.begin("garden", true);
   spray_period = preferences.getULong("spray_period", 10000);
   spray_duration = preferences.getULong("spray_duration", 1000);
   preferences.end();
+
+  // setup Scheduler intervals for pumps
   tPump.setInterval(spray_period * TASK_MILLISECOND);
   tPumpOff.setInterval(spray_duration * TASK_MILLISECOND);
 
+  // start websocket
   initWebSocket();
 
+  // setup handler for web access
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
   });
 
+  // start webserver
   server.begin();
 }
 
@@ -421,6 +515,8 @@ void loop() {
   getFlowRate();
   setPumpState();
   setValveState();
+  setFanState();
+  setLightState();
 }
 
 
