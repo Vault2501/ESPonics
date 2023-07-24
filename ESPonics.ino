@@ -25,6 +25,7 @@ bool valve2_state=1;
 bool fan1_state=1;
 bool fan2_state=1;
 bool light_state=1;
+bool light_toggle=1;
 int active_pump=1;
 bool scheduler_active=1;
 
@@ -163,6 +164,8 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         notifyClients();
       }
       if (strcmp(command_item, "light") == 0) {
+        Serial.println("light toggle command");
+        light_toggle = 0;
         light_state = !light_state;
         scheduler_active = 0;
         notifyClients();
@@ -329,16 +332,22 @@ UnitecRCSwitch::ButtonCodes codes = {
 
 void setLightState()
 {
-  if (light_state == 1)
+  if (light_toggle == 0)
   {
-    // Turn light off
-    mySwitch.switchOff(UnitecRCSwitch::SOCKET_A);
-  }
+    if (light_state == 1)
+    {
+      // Turn light off
+      Serial.println("Turning light off");
+      mySwitch.switchOff(UnitecRCSwitch::SOCKET_A);
+    }
 
-  if (light_state == 0)
-  {
-    // Turn light on
-    mySwitch.switchOff(UnitecRCSwitch::SOCKET_A);
+    if (light_state == 0)
+    {
+      // Turn light on
+      Serial.println("Turning light on");
+      mySwitch.switchOn(UnitecRCSwitch::SOCKET_A);
+    }
+    light_toggle = !light_toggle;
   }
 }
 
@@ -374,17 +383,17 @@ void getFlowRate() {
     totalMilliLitres += flowMilliLitres;
     
     // Print the flow rate for this second in litres / minute
-    Serial.print("Flow rate: ");
-    Serial.print(int(flowRate));  // Print the integer part of the variable
-    Serial.print("L/min");
-    Serial.print("\t");       // Print tab space
+    //Serial.print("Flow rate: ");
+    //Serial.print(int(flowRate));  // Print the integer part of the variable
+    //Serial.print("L/min");
+    //Serial.print("\t");       // Print tab space
 
     // Print the cumulative total of litres flowed since starting
-    Serial.print("Output Liquid Quantity: ");
-    Serial.print(totalMilliLitres);
-    Serial.print("mL / ");
-    Serial.print(totalMilliLitres / 1000);
-    Serial.println("L");
+    //Serial.print("Output Liquid Quantity: ");
+    //Serial.print(totalMilliLitres);
+    //Serial.print("mL / ");
+    //Serial.print(totalMilliLitres / 1000);
+    //Serial.println("L");
   }
 }
 
@@ -471,7 +480,7 @@ void setup() {
 
   // button setup for rf switch
   mySwitch.setBtnCodes(&codes);
-  mySwitch.enableTransmit(27);
+  mySwitch.enableTransmit(rf_pin);
 
   // initialize variables for flow meter and attach flow pin to interrupt handler
   pulseCount = 0;

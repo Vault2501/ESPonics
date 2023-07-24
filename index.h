@@ -111,18 +111,35 @@ const char index_html[] PROGMEM = R"rawliteral(
       <h2>Pump 1</h2>
       <p class="pump1_state">State: <span id="pump1_state">%PUMP1_STATE%</span></p>
       <p><button id="pump1_button" class="button">Toggle</button></p>
+
       <h2>Pump 2</h2>
       <p class="pump2_state">State: <span id="pump2_state">%PUMP2_STATE%</span></p>
       <p><button id="pump2_button" class="button">Toggle</button></p>
+
       <h2>Valve 1</h2>
       <p class="valve1_state">State: <span id="valve1_state">%VALVE1_STATE%</span></p>
       <p><button id="valve1_button" class="button">Toggle</button></p>
+
       <h2>Valve 2</h2>
       <p class="valve2_state">State: <span id="valve2_state">%VALVE2_STATE%</span></p>
       <p><button id="valve2_button" class="button">Toggle</button></p>
+
+      <h2>Fan 1</h2>
+      <p class="fan1_state">State: <span id="fan1_state">%FAN1_STATE%</span></p>
+      <p><button id="fan1_button" class="button">Toggle</button></p>
+
+      <h2>Fan 2</h2>
+      <p class="fan2_state">State: <span id="fan2_state">%FAN2_STATE%</span></p>
+      <p><button id="fan2_button" class="button">Toggle</button></p>
+
+      <h2>Light</h2>
+      <p class="light_state">State: <span id="light_state">%LIGHT_STATE%</span></p>
+      <p><button id="light_button" class="button">Toggle</button></p>
+
       <h2>Flow Meter</h2>
       <p class="flow_rate">Flow rate (L/m): <span id="flow_rate">%FLOW_RATE%</span></p>
       <p class="flow_quantity">Flow Quantity Total (ml): <span id="flow_quantity">%FLOW_QUANTITY%</span></p>
+
       <h2>Scheduler</h2>
       <p class="scheduler_active">State: <span id="scheduler_active">%SCHEDULER_ACTIVE%</span></p>
       <p><button id="scheduler_button" class="button">Toggle</button></p>
@@ -189,6 +206,24 @@ const char index_html[] PROGMEM = R"rawliteral(
     else{
       valve2_state_display = "OPEN";
     }
+    if (garden.fan1_state == "1"){
+      fan1_state_display = "OFF";
+    }
+    else{
+      fan1_state_display = "ON";
+    }
+    if (garden.fan2_state == "1"){
+      fan2_state_display = "OFF";
+    }
+    else{
+      fan2_state_display = "ON";
+    }
+    if (garden.light_state == "1"){
+      light_state_display = "OFF";
+    }
+    else{
+      light_state_display = "ON";
+    }
     if (garden.scheduler_active == "1"){
       scheduler_active_display = "ACTIVE";
     }
@@ -199,6 +234,9 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('pump2_state').innerHTML = pump2_state_display;
     document.getElementById('valve1_state').innerHTML = valve1_state_display;
     document.getElementById('valve2_state').innerHTML = valve2_state_display;
+    document.getElementById('fan1_state').innerHTML = fan1_state_display;
+    document.getElementById('fan2_state').innerHTML = fan2_state_display;
+    document.getElementById('light_state').innerHTML = light_state_display;
     document.getElementById('scheduler_active').innerHTML = scheduler_active_display;
     document.getElementById('flow_rate').innerHTML = garden.flow_rate;
     document.getElementById('flow_quantity').innerHTML = garden.flow_quantity;
@@ -214,6 +252,9 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('pump2_button').addEventListener('click', toggle_pump2);
     document.getElementById('valve1_button').addEventListener('click', toggle_valve1);
     document.getElementById('valve2_button').addEventListener('click', toggle_valve2);
+    document.getElementById('fan1_button').addEventListener('click', toggle_fan1);
+    document.getElementById('fan2_button').addEventListener('click', toggle_fan2);
+    document.getElementById('light_button').addEventListener('click', toggle_light);
     document.getElementById('scheduler_button').addEventListener('click', toggle_scheduler);
     document.getElementById('update_spray_period_button').addEventListener('click', update_spray_period);
     document.getElementById('update_spray_duration_button').addEventListener('click', update_spray_duration);
@@ -242,6 +283,27 @@ const char index_html[] PROGMEM = R"rawliteral(
   function toggle_valve2() {
     garden_command.type = "toggle";
     garden_command.item = "valve2";
+    garden_command.value = 0;
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function toggle_fan1() {
+    garden_command.type = "toggle";
+    garden_command.item = "fan1";
+    garden_command.value = 0;
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function toggle_fan2() {
+    garden_command.type = "toggle";
+    garden_command.item = "fan2";
+    garden_command.value = 0;
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function toggle_light() {
+    garden_command.type = "toggle";
+    garden_command.item = "light";
     garden_command.value = 0;
     const garden_data = JSON.stringify(garden_command);
     websocket.send(garden_data);
