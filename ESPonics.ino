@@ -414,7 +414,7 @@ void enableLight() {
 
 void disableLight() {
   Serial.print("Disabling Light ");
-  light_state = 0;
+  light_state = 1;
   light_toggle = 0;
   notifyClients();
 };
