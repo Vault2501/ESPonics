@@ -23,6 +23,7 @@ bool pump2_state=1;
 bool valve1_state=1;
 bool valve2_state=1;
 bool fan1_state=1;
+int fan1_speed = 0;
 bool fan2_state=1;
 bool light_state=1;
 bool light_toggle=1;
@@ -35,8 +36,8 @@ const int valve1_pin = 12;
 const int valve2_pin = 15;
 const int fan1_pin = 16;
 const int fan2_pin = 17;
-const int fan1_pwm_pin = 25;
-//const int fan2_pwm_pin = ;
+const int fanpwm1_pin = 25;
+//const int fanpwm2_pin = ;
 const int rf_pin = 13;
 const int flow_pin = 32;
 
@@ -94,6 +95,7 @@ void notifyClients() {
                \n\t\"valve1_state\": \"" + String(valve1_state) +"\",\
                \n\t\"valve2_state\": \"" + String(valve2_state) +"\",\
                \n\t\"fan1_state\": \"" + String(fan1_state) +"\",\
+               \n\t\"fan1_speed\": \"" + String(fan1_speed) +"\",\
                \n\t\"fan2_state\": \"" + String(fan2_state) +"\",\
                \n\t\"light_state\": \"" + String(light_state) +"\",\
                \n\t\"scheduler_active\": \"" + String(scheduler_active) +"\",\ 
@@ -190,6 +192,14 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         scheduler_active = 1;
         notifyClients();
       }
+      if (strcmp(command_item, "fan1_speed") == 0) {
+        fan1_speed = garden_command["value"];
+        preferences.begin("garden", false);
+        preferences.putULong("fan1_speed", fan1_speed);
+        preferences.end();
+        setFanPwm(fanpwm1_pin,fan1_speed);
+        notifyClients();
+      }
     }
   }
 }
@@ -250,6 +260,9 @@ String processor(const String& var){
   }  
   else if(var == "FAN2_STATE"){
     return String(fan2_state);
+  }
+  else if(var == "FAN1_SPEED"){
+    return String(fan1_speed);
   }
   else if(var == "LIGHT_STATE"){
     return String(light_state);
@@ -314,6 +327,14 @@ void setFanState()
   digitalWrite(fan2_pin,fan2_state);
 }
 
+void setFanPwm(int pin, int duty)
+{
+  Serial.print("Setting PWM ");
+  Serial.print(pin);
+  Serial.print(" to ");
+  Serial.println(duty);
+  analogWrite(pin, (duty / 100) * 1023);
+}
 //////////////////////////////////////////////
 /// Light
 
@@ -489,6 +510,9 @@ void setup() {
   totalMilliLitres = 0;
   previousMillis = 0;
   attachInterrupt(digitalPinToInterrupt(flow_pin), pulseCounter, FALLING);
+
+  pinMode(fanpwm1_pin,OUTPUT);
+  analogWriteFrequency(25000);
 
   // setup WiFiManager and OTA updates
   setupWiFiManager();  

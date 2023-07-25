@@ -97,6 +97,11 @@ const char index_html[] PROGMEM = R"rawliteral(
      color:#8c8c8c;
      font-weight: bold;
   }
+  .fan1_speed {
+     font-size: 1.5rem;
+     color:#8c8c8c;
+     font-weight: bold;
+  }
   </style>
 <title>Garden</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -128,6 +133,13 @@ const char index_html[] PROGMEM = R"rawliteral(
       <p class="fan1_state">State: <span id="fan1_state">%FAN1_STATE%</span></p>
       <p><button id="fan1_button" class="button">Toggle</button></p>
 
+      <h2>Fan 1 Speed</h2>
+      <p class="fan1_speed">
+        Fan 1 Speed (0-100): <span id="fan1_speed">%FAN1_SPEED%</span><br>
+        New value: <input type="text" id="new_fan1_speed" value="%FAN1_SPEED%">
+        <button id="update_fan1_speed_button" class="button">Update</button>
+      </p>
+
       <h2>Fan 2</h2>
       <p class="fan2_state">State: <span id="fan2_state">%FAN2_STATE%</span></p>
       <p><button id="fan2_button" class="button">Toggle</button></p>
@@ -143,6 +155,8 @@ const char index_html[] PROGMEM = R"rawliteral(
       <h2>Scheduler</h2>
       <p class="scheduler_active">State: <span id="scheduler_active">%SCHEDULER_ACTIVE%</span></p>
       <p><button id="scheduler_button" class="button">Toggle</button></p>
+
+      <h2>Spray Period</h2>
       <p class="spray_period">
         Spray period (ms): <span id="spray_period">%SPRAY_PERIOD%</span><br>
         New value: <input type="text" id="new_spray_period" value="%SPRAY_PERIOD%">
@@ -235,6 +249,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('valve1_state').innerHTML = valve1_state_display;
     document.getElementById('valve2_state').innerHTML = valve2_state_display;
     document.getElementById('fan1_state').innerHTML = fan1_state_display;
+    document.getElementById('fan1_speed').innerHTML = garden.fan1_speed;
     document.getElementById('fan2_state').innerHTML = fan2_state_display;
     document.getElementById('light_state').innerHTML = light_state_display;
     document.getElementById('scheduler_active').innerHTML = scheduler_active_display;
@@ -253,6 +268,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('valve1_button').addEventListener('click', toggle_valve1);
     document.getElementById('valve2_button').addEventListener('click', toggle_valve2);
     document.getElementById('fan1_button').addEventListener('click', toggle_fan1);
+    document.getElementById('update_fan1_speed_button').addEventListener('click', update_fan1_speed);
     document.getElementById('fan2_button').addEventListener('click', toggle_fan2);
     document.getElementById('light_button').addEventListener('click', toggle_light);
     document.getElementById('scheduler_button').addEventListener('click', toggle_scheduler);
@@ -291,6 +307,13 @@ const char index_html[] PROGMEM = R"rawliteral(
     garden_command.type = "toggle";
     garden_command.item = "fan1";
     garden_command.value = 0;
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function update_fan1_speed() {
+    garden_command.type = "update";
+    garden_command.item = "fan1_speed";
+    garden_command.value = document.getElementById("new_fan1_speed").value
     const garden_data = JSON.stringify(garden_command);
     websocket.send(garden_data);
   }
