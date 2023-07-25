@@ -148,6 +148,18 @@ const char index_html[] PROGMEM = R"rawliteral(
       <p class="light_state">State: <span id="light_state">%LIGHT_STATE%</span></p>
       <p><button id="light_button" class="button">Toggle</button></p>
 
+      <h2>Light Times (h)</h2>
+      <p class="light_on">
+        Light On time(h): <span id="light_on">%LIGHT_ON%</span><br>
+        New value: <input type="text" id="new_light_on" value="%LIGHT_ON%">
+        <button id="update_light_on_button" class="button">Update</button>
+      </p>
+      <p class="light_off">
+        Spray Off time(h): <span id="light_off">%LIGHT_OFF%</span><br>
+        New value: <input type="text" id="new_light_off" value="%LIGHT_OFF%">
+        <button id="update_light_off_button" class="button">Update</button>
+      </p>
+
       <h2>Flow Meter</h2>
       <p class="flow_rate">Flow rate (L/m): <span id="flow_rate">%FLOW_RATE%</span></p>
       <p class="flow_quantity">Flow Quantity Total (ml): <span id="flow_quantity">%FLOW_QUANTITY%</span></p>
@@ -252,6 +264,9 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('fan1_speed').innerHTML = garden.fan1_speed;
     document.getElementById('fan2_state').innerHTML = fan2_state_display;
     document.getElementById('light_state').innerHTML = light_state_display;
+    document.getElementById('flow_quantity').innerHTML = garden.flow_quantity;
+    document.getElementById('light_on').innerHTML = garden.light_on;
+    document.getElementById('light_off').innerHTML = garden.light_off;
     document.getElementById('scheduler_active').innerHTML = scheduler_active_display;
     document.getElementById('flow_rate').innerHTML = garden.flow_rate;
     document.getElementById('flow_quantity').innerHTML = garden.flow_quantity;
@@ -271,6 +286,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('update_fan1_speed_button').addEventListener('click', update_fan1_speed);
     document.getElementById('fan2_button').addEventListener('click', toggle_fan2);
     document.getElementById('light_button').addEventListener('click', toggle_light);
+    document.getElementById('update_light_on_button').addEventListener('click', update_light_on);
+    document.getElementById('update_light_off_button').addEventListener('click', update_light_off);
     document.getElementById('scheduler_button').addEventListener('click', toggle_scheduler);
     document.getElementById('update_spray_period_button').addEventListener('click', update_spray_period);
     document.getElementById('update_spray_duration_button').addEventListener('click', update_spray_duration);
@@ -328,6 +345,20 @@ const char index_html[] PROGMEM = R"rawliteral(
     garden_command.type = "toggle";
     garden_command.item = "light";
     garden_command.value = 0;
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function update_light_on() {
+    garden_command.type = "update";
+    garden_command.item = "light_on";
+    garden_command.value = document.getElementById("new_light_on").value
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function update_light_off() {
+    garden_command.type = "update";
+    garden_command.item = "light_off";
+    garden_command.value = document.getElementById("new_light_off").value
     const garden_data = JSON.stringify(garden_command);
     websocket.send(garden_data);
   }

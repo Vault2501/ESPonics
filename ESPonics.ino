@@ -26,6 +26,8 @@ bool fan1_state=1;
 int fan1_speed = 0;
 bool fan2_state=1;
 bool light_state=1;
+int light_on=12;
+int light_off=12;
 bool light_toggle=1;
 int active_pump=1;
 bool scheduler_active=1;
@@ -52,8 +54,12 @@ unsigned long spray_duration = 1000;
 Scheduler ts;
 void enableSpray();
 void disableSpray();
+void enableLight();
+void disableLight();
 Task tPump (spray_period * TASK_MILLISECOND, TASK_FOREVER, &enableSpray, &ts, true);
 Task tPumpOff (spray_duration * TASK_MILLISECOND, TASK_ONCE, &disableSpray, &ts, false);
+Task tLightOn (light_on * TASK_HOUR, TASK_FOREVER, &enableLight, &ts, true);
+Task tLightOff (light_off * TASK_HOUR, TASK_ONCE, &disableLight, &ts, false);
 
 long currentMillis = 0;
 long previousMillis = 0;
@@ -98,6 +104,8 @@ void notifyClients() {
                \n\t\"fan1_speed\": \"" + String(fan1_speed) +"\",\
                \n\t\"fan2_state\": \"" + String(fan2_state) +"\",\
                \n\t\"light_state\": \"" + String(light_state) +"\",\
+               \n\t\"light_on\": \"" + String(light_on) +"\",\
+               \n\t\"light_off\": \"" + String(light_off) +"\",\
                \n\t\"scheduler_active\": \"" + String(scheduler_active) +"\",\ 
                \n\t\"flow_rate\": \"" + String(flowRate) +"\",\
                \n\t\"flow_quantity\": \"" + String(totalMilliLitres) +"\",\
@@ -174,6 +182,24 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       }
     }
     if (strcmp(command_type, "update") == 0) {
+      if (strcmp(command_item, "light_on") == 0) {
+        spray_period = garden_command["value"];
+        preferences.begin("garden", false);
+        preferences.putULong("light_on", light_on);
+        preferences.end();
+        tLightOn.setInterval(light_on * TASK_HOUR);
+        scheduler_active = 1;
+        notifyClients();
+      }
+      if (strcmp(command_item, "light_off") == 0) {
+        spray_period = garden_command["value"];
+        preferences.begin("garden", false);
+        preferences.putULong("light_off", light_off);
+        preferences.end();
+        tLightOn.setInterval(light_off * TASK_HOUR);
+        scheduler_active = 1;
+        notifyClients();
+      }
       if (strcmp(command_item, "spray_period") == 0) {
         spray_period = garden_command["value"];
         preferences.begin("garden", false);
@@ -266,6 +292,12 @@ String processor(const String& var){
   }
   else if(var == "LIGHT_STATE"){
     return String(light_state);
+  }
+  else if(var == "LIGHT_ON"){
+    return String(light_on);
+  }
+  else if(var == "LIGHT_OFF"){
+    return String(light_off);
   }
   else {
     Serial.println("template: Unknown variable");
@@ -371,6 +403,21 @@ void setLightState()
     light_toggle = !light_toggle;
   }
 }
+
+void enableLight() {
+  Serial.print("Enabling light");
+  light_state = 0;
+  light_toggle = 0;
+  notifyClients();
+  tLightOff.restartDelayed();
+};
+
+void disableLight() {
+  Serial.print("Disabling Light ");
+  light_state = 0;
+  light_toggle = 0;
+  notifyClients();
+};
 
 //////////////////////////////////////////////
 /// Flow Rate
@@ -522,11 +569,15 @@ void setup() {
   preferences.begin("garden", true);
   spray_period = preferences.getULong("spray_period", 10000);
   spray_duration = preferences.getULong("spray_duration", 1000);
+  light_on = preferences.getULong("light_on", 12);
+  light_off = preferences.getULong("light_off", 12);
   preferences.end();
 
   // setup Scheduler intervals for pumps
   tPump.setInterval(spray_period * TASK_MILLISECOND);
   tPumpOff.setInterval(spray_duration * TASK_MILLISECOND);
+  tLightOn.setInterval(light_on *TASK_HOUR);
+  tLightOff.setInterval(light_off *TASK_HOUR);
 
   // start websocket
   initWebSocket();
