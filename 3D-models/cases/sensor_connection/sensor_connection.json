@@ -1,0 +1,48 @@
+{
+    "parameterSets": {
+        "water_level_sensor": {
+            "$fn": "32",
+            "connector": "true",
+            "dia_GX16": "6.3",
+            "dia_sensor": "3.1",
+            "extra_GX16": "20",
+            "extra_sensor": "10",
+            "gap": "0.3",
+            "height_case": "20",
+            "len_board": "27",
+            "render": "all",
+            "wall": "2",
+            "wid_board": "26"
+        },
+        "temperature_sensor": {
+            "$fn": "32",
+            "connector": "true",
+            "dia_GX16": "6.3",
+            "dia_sensor": "3.8",
+            "extra_GX16": "20",
+            "extra_sensor": "10",
+            "gap": "0.3",
+            "height_case": "20",
+            "len_board": "27",
+            "render": "all",
+            "wall": "2",
+            "wid_board": "26"
+        },
+        "humidity_sensor": {
+            "$fn": "32",
+            "connector": "true",
+            "dia_GX16": "6.3",
+            "dia_sensor": "0",
+            "extra_GX16": "20",
+            "extra_sensor": "25",
+            "gap": "0.3",
+            "height_case": "20",
+            "len_board": "27",
+            "render": "all",
+            "ventilation": "true",
+            "wall": "2",
+            "wid_board": "26"
+        }
+    },
+    "fileFormatVersion": "1"
+}

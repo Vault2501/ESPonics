@@ -1,0 +1,30 @@
+{
+    "parameterSets": {
+        "sensor box": {
+            "$fn": "1024",
+            "count_GX16": "4",
+            "dim_board_1": "[89.1, 52.3, 1.6]",
+            "dim_board_2": "[32.4, 42, 1.6]",
+            "dim_board_3": "[32.4, 42, 1.6]",
+            "extra_y_case": "12",
+            "gap": "0.3",
+            "height_bottom": "10",
+            "length_screw_boards": "7.5",
+            "length_screw_case": "35",
+            "object": "bottom",
+            "off_xy_screw_board_1": "[5, 8]",
+            "off_xy_screw_board_2": "[3.2, 3.2]",
+            "off_xy_screw_board_3": "[3.2, 3.2]",
+            "off_xz_port_bnc": "[14, 6.8]",
+            "off_xz_port_ether": "[8.5, 13]",
+            "off_y_board_1": "5.5",
+            "off_y_board_2": "12",
+            "off_y_board_3": "4",
+            "show_boards": "false",
+            "spacing_GX16": "5",
+            "wall": "2"
+        }
+    },
+    "fileFormatVersion": "1",
+    "parameterSets": ""
+}
