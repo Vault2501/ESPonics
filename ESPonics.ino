@@ -18,6 +18,11 @@ const char* myhostname = "esponics";
 const char* ssid = APSSID;
 const char* key =  APKEY;
 
+// setting PWM properties
+const int freq = 25000;
+const int fanChannel = 0;
+const int resolution = 8;
+
 bool pump1_state=1;
 bool pump2_state=1;
 bool valve1_state=1;
@@ -58,8 +63,8 @@ void enableLight();
 void disableLight();
 Task tPump (spray_period * TASK_MILLISECOND, TASK_FOREVER, &enableSpray, &ts, true);
 Task tPumpOff (spray_duration * TASK_MILLISECOND, TASK_ONCE, &disableSpray, &ts, false);
-Task tLightOn (light_on * TASK_HOUR, TASK_FOREVER, &enableLight, &ts, true);
-Task tLightOff (light_off * TASK_HOUR, TASK_ONCE, &disableLight, &ts, false);
+Task tLightOn (light_on * TASK_SECOND, TASK_FOREVER, &enableLight, &ts, true);
+Task tLightOff (light_off * TASK_SECOND, TASK_ONCE, &disableLight, &ts, false);
 
 long currentMillis = 0;
 long previousMillis = 0;
@@ -183,20 +188,20 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     }
     if (strcmp(command_type, "update") == 0) {
       if (strcmp(command_item, "light_on") == 0) {
-        spray_period = garden_command["value"];
+        light_on = garden_command["value"];
         preferences.begin("garden", false);
         preferences.putULong("light_on", light_on);
         preferences.end();
-        tLightOn.setInterval(light_on * TASK_HOUR);
+        tLightOn.setInterval(light_on * TASK_SECOND);
         scheduler_active = 1;
         notifyClients();
       }
       if (strcmp(command_item, "light_off") == 0) {
-        spray_period = garden_command["value"];
+        light_off = garden_command["value"];
         preferences.begin("garden", false);
         preferences.putULong("light_off", light_off);
         preferences.end();
-        tLightOn.setInterval(light_off * TASK_HOUR);
+        tLightOn.setInterval(light_off * TASK_SECOND);
         scheduler_active = 1;
         notifyClients();
       }
@@ -365,7 +370,10 @@ void setFanPwm(int pin, int duty)
   Serial.print(pin);
   Serial.print(" to ");
   Serial.println(duty);
-  analogWrite(pin, (duty / 100) * 1023);
+  int dutyCycle = (duty * 255) / 100;
+  Serial.println(dutyCycle);
+  ledcWrite(fanChannel, dutyCycle);
+  //analogWrite(pin, (duty / 100) * 1023);
 }
 //////////////////////////////////////////////
 /// Light
@@ -405,7 +413,7 @@ void setLightState()
 }
 
 void enableLight() {
-  Serial.print("Enabling light");
+  Serial.println("Enabling light");
   light_state = 0;
   light_toggle = 0;
   notifyClients();
@@ -413,7 +421,7 @@ void enableLight() {
 };
 
 void disableLight() {
-  Serial.print("Disabling Light ");
+  Serial.println("Disabling Light ");
   light_state = 1;
   light_toggle = 0;
   notifyClients();
@@ -558,8 +566,11 @@ void setup() {
   previousMillis = 0;
   attachInterrupt(digitalPinToInterrupt(flow_pin), pulseCounter, FALLING);
 
+  // setup fan pwm
   pinMode(fanpwm1_pin,OUTPUT);
-  analogWriteFrequency(25000);
+  //analogWriteFrequency(25000);
+  ledcSetup(fanChannel, freq, resolution);
+  ledcAttachPin(fanpwm1_pin, fanChannel);
 
   // setup WiFiManager and OTA updates
   setupWiFiManager();  
@@ -576,8 +587,8 @@ void setup() {
   // setup Scheduler intervals for pumps
   tPump.setInterval(spray_period * TASK_MILLISECOND);
   tPumpOff.setInterval(spray_duration * TASK_MILLISECOND);
-  tLightOn.setInterval(light_on *TASK_HOUR);
-  tLightOff.setInterval(light_off *TASK_HOUR);
+  tLightOn.setInterval(light_on *TASK_SECOND);
+  tLightOff.setInterval(light_off *TASK_SECOND);
 
   // start websocket
   initWebSocket();
