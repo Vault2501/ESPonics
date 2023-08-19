@@ -1,0 +1,29 @@
+{
+    "parameterSets": {
+        "design default values": {
+            "$fn": "32",
+            "bar_bottom": "2",
+            "bar_height": "6",
+            "bar_length": "150",
+            "bar_width": "20",
+            "connector_width": "10",
+            "gap": "0.2",
+            "pipe_dia": "6",
+            "print": "bar",
+            "space": "4.5"
+        },
+        "short bar": {
+            "$fn": "32",
+            "bar_bottom": "2",
+            "bar_height": "6",
+            "bar_length": "77",
+            "bar_width": "20",
+            "connector_width": "10",
+            "gap": "0.2",
+            "pipe_dia": "6",
+            "print": "bar",
+            "space": "4.5"
+        }
+    },
+    "fileFormatVersion": "1"
+}
