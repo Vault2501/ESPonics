@@ -1,0 +1,3 @@
+[submodule "3D-models/cases/main_controller/openscad-libraries"]
+	path = 3D-models/cases/main_controller/openscad-libraries
+	url = git@github.com:Vault2501/openscad-libraries.git
