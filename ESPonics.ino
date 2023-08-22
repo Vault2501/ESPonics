@@ -5,13 +5,14 @@
 #include <ArduinoOTA.h>
 #include <TaskScheduler.h>
 #include <UnitecRCSwitch.h>
+#include <DHT.h>
 #include <ArduinoJson.h>
 #include <Preferences.h>
 #include "wifi.h"
 #include "index.h"
 
 #define DEBUG 1
-
+#define DHTTYPE DHT22
 
 
 const char* myhostname = "esponics";
@@ -25,6 +26,8 @@ const int resolution = 8;
 
 // scheduler settings
 bool scheduler_active=1;
+unsigned long spray_period = 10000;
+unsigned long spray_duration = 1000;
 
 // pump/valve states
 int active_pump=1;
@@ -59,7 +62,7 @@ const int rf_pin = 13;
 
 // sensor box pins
 const int temp_pin = 39;
-const int humidity_pin = 36;
+const int dht_pin = 36;
 const int ec_pin = 35;
 const int ph_pin = 34;
 const int level_pin = 33;
@@ -69,8 +72,11 @@ Preferences preferences;
 AsyncWebServer server(8080);
 AsyncWebSocket ws("/ws");
 
-unsigned long spray_period = 10000;
-unsigned long spray_duration = 1000;
+DHT dht(dht_pin, DHTTYPE);
+float dhtValueTemp = 0;
+float dhtValueHumidity = 0;
+
+
 
 Scheduler ts;
 void enableSpray();
@@ -490,6 +496,21 @@ void getFlowRate() {
 }
 
 
+// DHT Humidity/Temperature
+void getDhtValue() {
+  currentMillis = millis();
+  if (currentMillis - previousMillis > interval) {
+    dhtValueTemp = dht.readTemperature();
+    dhtValueHumidity = dht.readHumidity();
+    if (isnan(dhtValueTemp) || isnan(dhtValueHumidity)) {
+      Serial.println(F("Failed to read from DHT sensor!"));
+      return;
+    }
+    previousMillis = millis();
+  }
+}
+
+
 //////////////////////////////////////////////
 /// OTA part
 
@@ -574,6 +595,9 @@ void setup() {
   mySwitch.setBtnCodes(&codes);
   mySwitch.enableTransmit(rf_pin);
 
+  // initialize dht
+  dht.begin();
+
   // initialize variables for flow meter and attach flow pin to interrupt handler
   pulseCount = 0;
   flowRate = 0.0;
@@ -628,6 +652,7 @@ void loop() {
   setValveState();
   setFanState();
   setLightState();
+  getDhtValue();
 }
 
 
