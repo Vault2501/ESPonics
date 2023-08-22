@@ -46,6 +46,7 @@ bool light_state=1;
 int light_on=12;
 int light_off=12;
 bool light_toggle=1;
+bool water_state=0;
 
 // pump module pins
 const int pump1_pin = 27;
@@ -526,6 +527,19 @@ void getTempValue() {
     previousMillis = millis();
   }
 }
+
+// water level
+void getWaterState() {
+  currentMillis = millis();
+  if (currentMillis - previousMillis > interval) {
+    water_state = digitalRead(level_pin);
+    if( water_state == HIGH)  {
+      Serial.println("Water ok"); 
+    }
+    previousMillis = millis();
+  }
+}
+
 //////////////////////////////////////////////
 /// OTA part
 
@@ -606,6 +620,9 @@ void setup() {
   pinMode(rf_pin,OUTPUT);
   digitalWrite(rf_pin,LOW);
 
+  // initialize level pin
+  pinMode(level_pin, INPUT);
+
   // button setup for rf switch
   mySwitch.setBtnCodes(&codes);
   mySwitch.enableTransmit(rf_pin);
@@ -671,6 +688,7 @@ void loop() {
   setFanState();
   setLightState();
   getDhtValue();
+  getWaterState();
 }
 
 
