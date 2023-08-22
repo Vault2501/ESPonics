@@ -6,6 +6,8 @@
 #include <TaskScheduler.h>
 #include <UnitecRCSwitch.h>
 #include <DHT.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 #include <ArduinoJson.h>
 #include <Preferences.h>
 #include "wifi.h"
@@ -76,7 +78,9 @@ DHT dht(dht_pin, DHTTYPE);
 float dhtValueTemp = 0;
 float dhtValueHumidity = 0;
 
-
+OneWire oneWire(temp_pin);
+DallasTemperature temp_sensor(&oneWire);
+float dallasValueTemp;
 
 Scheduler ts;
 void enableSpray();
@@ -510,7 +514,18 @@ void getDhtValue() {
   }
 }
 
-
+// 18B20 Temperature
+void getTempValue() {
+  currentMillis = millis();
+  if (currentMillis - previousMillis > interval) {
+    dallasValueTemp = temp_sensor.getTempCByIndex(0);
+    if (isnan(dallasValueTemp)) {
+      Serial.println(F("Failed to read from 18B20 sensor!"));
+      return;
+    }
+    previousMillis = millis();
+  }
+}
 //////////////////////////////////////////////
 /// OTA part
 
@@ -597,6 +612,9 @@ void setup() {
 
   // initialize dht
   dht.begin();
+
+  // initialize 18B20 temperature sensor
+  temp_sensor.begin();
 
   // initialize variables for flow meter and attach flow pin to interrupt handler
   pulseCount = 0;
