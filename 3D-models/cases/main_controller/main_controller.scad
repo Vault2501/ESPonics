@@ -6,11 +6,11 @@ wall                    = 2;
 // gap for fitting
 gap                     = 0.3;
 // height of the lid
-height_top              = 10;
+height_top              = 8;
 // set to true to render the boards
 show_boards             = false;
 // Which object to render. Choices: top, bottom
-object                  = "top";
+object                  = "bottom";
 // render boards (for debugging)
 render_boards           = false;
 
@@ -26,12 +26,12 @@ dia_screw_board         = 2.2+gap;
 // dimensions of boards
 dim_boards             = [89.1,52.3,1.6];
 // offset of boards in y direction
-off_y_boards           = -2.6;
+off_y_boards           = -2;
 // x/y offset from the corner for screw holes of the boards
 off_xy_screw_boards    = [5,8];
 
 // x/z offset of the ethernet port
-off_xz_port_ether       = [10,12];
+off_xz_port_ether       = [10,14];
 // dist between ethernet ports
 dist_port_ether         = 9.75;
 // x/z dimension of the ethernet port
@@ -42,13 +42,17 @@ dim_switch_power        = [12,wall+gap,19];
 dia_port_power         = 11.8;
 // xz offset of power plug and switch
 off_xz_power            = [10,10];
-
+// usb port dimension
+dim_port_usb            = [wall+gap,15,6.5];
+// xz offset of usb
+off_yz_usb              = [80,14];
 
 height_inside = length_screw_case-2*(gap+wall)+2*dia_screw_case;
 length_inside = dim_boards[0];
 width_inside  = dim_boards[1]+dim_boards[1]+wall+off_y_boards;
 
 width_outside = width_inside+2*(2*dia_screw_case+wall+gap);
+length_outside = length_inside+2*(2*dia_screw_case+wall+gap);
 
 off_boards_xy = 2*dia_screw_case+wall+gap;
 off_boards_z  = length_screw_board-dim_boards[2];
@@ -78,7 +82,8 @@ difference()
     place_board_2(){
         board_screws_cutout();
     }
-    #power_connection();
+    power_connection();
+    usb_cutout();
 }
 
 if(object=="bottom" || object == "all")
@@ -162,12 +167,20 @@ module ethernet_cutout()
     }
 }
 
+module usb_cutout()
+{
+    translate([length_outside-wall-gap,off_yz_usb[0],off_yz_usb[1]])
+    {
+        #cube(dim_port_usb);
+    }
+}
+
 module power_connection()
 {
     translate([off_xz_power[0],off_y_power,off_xz_power[1]])
     {
         cube(dim_switch_power);
-        translate([dim_switch_power[0]+20,0,dia_port_power/2])
+        translate([dim_switch_power[0]+12,0,dia_port_power/2])
         {
             rotate([270,0,0])
             {
