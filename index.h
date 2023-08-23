@@ -4,6 +4,9 @@ const char index_html[] PROGMEM = R"rawliteral(
   <title>ESP Geiger Counter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
+  body {
+    margin: 0;
+  }
   html {
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
@@ -21,13 +24,32 @@ const char index_html[] PROGMEM = R"rawliteral(
     overflow: hidden;
     background-color: #143642;
   }
-  body {
-    margin: 0;
+  .tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
   }
-  .content {
-    padding: 30px;
-    max-width: 600px;
-    margin: 0 auto;
+  .tab button:hover {
+  background-color: #ddd;
+  }
+  .tab button.active {
+  background-color: #ccc;
+  }
+  .tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+  }
+  .tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
   }
   .card {
     background-color: #F8F7F9;;
@@ -108,10 +130,19 @@ const char index_html[] PROGMEM = R"rawliteral(
 <link rel="icon" href="data:,">
 </head>
 <body>
+  
   <div class="topnav">
     <h1>Garden</h1>
   </div>
-  <div class="content">
+
+  <div class="tab">
+    <button class="tablinks" onclick="openTab(event, 'Pumps')">Pumps</button>
+    <button class="tablinks" onclick="openTab(event, 'Sensors')">Sensors</button>
+    <button class="tablinks" onclick="openTab(event, 'FansLight')">Fans and Light</button>
+    <button class="tablinks" onclick="openTab(event, 'Scheduler')">Scheduler</button>
+  </div>
+  
+  <div id="Pumps" class="tabcontent">
     <div class="card">
       <h2>Pump 1</h2>
       <p class="pump1_state">State: <span id="pump1_state">%PUMP1_STATE%</span></p>
@@ -129,6 +160,19 @@ const char index_html[] PROGMEM = R"rawliteral(
       <p class="valve2_state">State: <span id="valve2_state">%VALVE2_STATE%</span></p>
       <p><button id="valve2_button" class="button">Toggle</button></p>
 
+      <h2>Flow Meter</h2>
+      <p class="flow_rate">Flow rate (L/m): <span id="flow_rate">%FLOW_RATE%</span></p>
+      <p class="flow_quantity">Flow Quantity Total (ml): <span id="flow_quantity">%FLOW_QUANTITY%</span></p>
+    </div>
+  </div>
+
+  <div id="Sensors" class="tabcontent">
+    <h2>Sensors</h2>
+
+  </div>
+
+  <div id="FansLight" class="tabcontent">
+    <div class="card">
       <h2>Fan 1</h2>
       <p class="fan1_state">State: <span id="fan1_state">%FAN1_STATE%</span></p>
       <p><button id="fan1_button" class="button">Toggle</button></p>
@@ -154,15 +198,17 @@ const char index_html[] PROGMEM = R"rawliteral(
         New value: <input type="text" id="new_light_on" value="%LIGHT_ON%">
         <button id="update_light_on_button" class="button">Update</button>
       </p>
+  
       <p class="light_off">
         Spray Off time(h): <span id="light_off">%LIGHT_OFF%</span><br>
         New value: <input type="text" id="new_light_off" value="%LIGHT_OFF%">
         <button id="update_light_off_button" class="button">Update</button>
       </p>
+    </div>
+  </div>
 
-      <h2>Flow Meter</h2>
-      <p class="flow_rate">Flow rate (L/m): <span id="flow_rate">%FLOW_RATE%</span></p>
-      <p class="flow_quantity">Flow Quantity Total (ml): <span id="flow_quantity">%FLOW_QUANTITY%</span></p>
+  <div id="Scheduler" class="tabcontent">
+    <div class="card">
 
       <h2>Scheduler</h2>
       <p class="scheduler_active">State: <span id="scheduler_active">%SCHEDULER_ACTIVE%</span></p>
@@ -181,6 +227,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       </p>
     </div>
   </div>
+
 <script>
   var gateway = `ws://${window.location.hostname}:8080/ws`;
   var websocket;
@@ -191,6 +238,21 @@ const char index_html[] PROGMEM = R"rawliteral(
   };
 
   window.addEventListener('load', onLoad);
+
+  function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
   function initWebSocket() {
     console.log('Trying to open a WebSocket connection...');
     websocket = new WebSocket(gateway);
@@ -387,4 +449,3 @@ const char index_html[] PROGMEM = R"rawliteral(
 </body>
 </html>
 )rawliteral";
-
