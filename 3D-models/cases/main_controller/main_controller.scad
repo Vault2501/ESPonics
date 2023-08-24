@@ -10,7 +10,7 @@ height_top              = 8;
 // set to true to render the boards
 show_boards             = false;
 // Which object to render. Choices: top, bottom
-object                  = "bottom";
+object                  = "top";
 // render boards (for debugging)
 render_boards           = false;
 
@@ -43,7 +43,7 @@ dia_port_power         = 11.8;
 // xz offset of power plug and switch
 off_xz_power            = [10,10];
 // usb port dimension
-dim_port_usb            = [wall+gap,15,6.5];
+dim_port_usb            = [wall+gap,15,20];
 // xz offset of usb
 off_yz_usb              = [80,14];
 
