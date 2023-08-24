@@ -12,6 +12,7 @@
 #include <Preferences.h>
 #include "wifi.h"
 #include "index.h"
+#include "calibrate.h"
 #include "vars.h"
 
 
@@ -606,6 +607,10 @@ void setup() {
   // setup handler for web access
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
+  });
+
+  server.on("/calibrate", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", calibrate_html, processor);
   });
 
   // start webserver
