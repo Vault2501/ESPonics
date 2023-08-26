@@ -25,7 +25,7 @@ bool valve2_state=1;
 
 // fan/light states
 bool fan1_state=1;
-int fan1_speed = 0;
+int fan1_speed=0;
 bool fan2_state=1;
 bool light_state=1;
 int light_on=12;
