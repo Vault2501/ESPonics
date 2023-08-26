@@ -399,8 +399,8 @@ void IRAM_ATTR pulseCounter()
 }
 
 void getFlowRate() {
-  currentMillis = millis();
-  if (currentMillis - previousMillis > interval) {
+  //currentMillis = millis();
+  //if (currentMillis - previousMillis > interval) {
     
     pulse1Sec = pulseCount;
     pulseCount = 0;
@@ -411,7 +411,7 @@ void getFlowRate() {
     // based on the number of pulses per second per units of measure (litres/minute in
     // this case) coming from the sensor.
     flowRate = ((1000.0 / (millis() - previousMillis)) * pulse1Sec) / calibrationFactor;
-    previousMillis = millis();
+    //previousMillis = millis();
 
     // Divide the flow rate in litres/minute by 60 to determine how many litres have
     // passed through the sensor in this 1 second interval, then multiply by 1000 to
@@ -433,47 +433,56 @@ void getFlowRate() {
     //Serial.print("mL / ");
     //Serial.print(totalMilliLitres / 1000);
     //Serial.println("L");
-  }
+  //}
 }
 
 
 // DHT Humidity/Temperature
 void getDhtValue() {
-  currentMillis = millis();
-  if (currentMillis - previousMillis > interval) {
-    dhtValueTemp = dht.readTemperature();
-    dhtValueHumidity = dht.readHumidity();
-    if (isnan(dhtValueTemp) || isnan(dhtValueHumidity)) {
-      Serial.println(F("Failed to read from DHT sensor!"));
-      return;
-    }
-    previousMillis = millis();
+  dhtValueTemp = dht.readTemperature();
+  dhtValueHumidity = dht.readHumidity();
+  if (isnan(dhtValueTemp) || isnan(dhtValueHumidity)) {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    return;
+  } else {
+    Serial.print("DHT Temperature:");
+    Serial.println(dhtValueTemp);
+    Serial.print("DHT Humidity:");
+    Serial.println(dhtValueHumidity);
   }
 }
 
 // 18B20 Temperature
 void getTempValue() {
-  currentMillis = millis();
-  if (currentMillis - previousMillis > interval) {
-    dallasValueTemp = temp_sensor.getTempCByIndex(0);
-    if (isnan(dallasValueTemp)) {
-      Serial.println(F("Failed to read from 18B20 sensor!"));
-      return;
-    }
-    previousMillis = millis();
+  dallasValueTemp = temp_sensor.getTempCByIndex(0);
+  if (isnan(dallasValueTemp)) {
+    Serial.println(F("Failed to read from 18B20 sensor!"));
+    return;
+  } else {
+    Serial.print("18B20 Temperature:");
+    Serial.println(dhtValueTemp);
   }
 }
 
 // water level
 void getWaterState() {
+  water_state = digitalRead(level_pin);
+  if( water_state == HIGH)  {
+    Serial.println("Water ok");
+  } else {
+    Serial.println("Water low");
+  }
+}
+
+void readSensors() {
   currentMillis = millis();
   if (currentMillis - previousMillis > interval) {
-    water_state = digitalRead(level_pin);
-    if( water_state == HIGH)  {
-      Serial.println("Water ok"); 
-    }
-    previousMillis = millis();
+    //getWaterState();
+    getTempValue();
+    //getDhtValue();
+    getFlowRate();
   }
+  previousMillis = millis();
 }
 
 //////////////////////////////////////////////
@@ -564,6 +573,7 @@ void setup() {
   mySwitch.enableTransmit(rf_pin);
 
   // initialize dht
+  pinMode(dht_pin, INPUT);
   dht.begin();
 
   // initialize 18B20 temperature sensor
@@ -622,13 +632,14 @@ void loop() {
   if (scheduler_active == 1) {
     ts.execute();
   }
-  getFlowRate();
+  //getFlowRate();
   setPumpState();
   setValveState();
   setFanState();
-  setLightState();
-  getDhtValue();
-  getWaterState();
+  //setLightState();
+  //getDhtValue();
+  //getWaterState();
+  readSensors();
 }
 
 
