@@ -101,7 +101,7 @@ const char calibrate_html[] PROGMEM = R"rawliteral(
     }
 
     function toggle_calibration() {
-      conoles.log('Starting calibration');
+      console.log('Starting calibration');
       garden_command.type = "toggle";
       garden_command.item = "calibration";
       garden_command.value = 0;
@@ -111,5 +111,5 @@ const char calibrate_html[] PROGMEM = R"rawliteral(
 
   </script>
 </body>
-html>
+</html>
 )rawliteral";
