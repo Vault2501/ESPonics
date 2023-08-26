@@ -1,0 +1,57 @@
+{
+    "parameterSets": {
+        "80mm_100mm_adapter": {
+            "$fn": "128",
+            "dia_cable": "6.3",
+            "dia_cylinder": "100",
+            "dia_screw": "4.4",
+            "dia_screw_cable_box": "3.5",
+            "dim_fan": "[80.8, 80.8, 25]",
+            "distx_screw": "4.5",
+            "height_cylinder": "30",
+            "object": "adapter",
+            "wall_adapter": "4",
+            "wall_cable_box": "2"
+        },
+        "80mm_100mm_cable_box_top": {
+            "$fn": "128",
+            "dia_cable": "6.3",
+            "dia_cylinder": "100",
+            "dia_screw": "4.4",
+            "dia_screw_cable_box": "3.5",
+            "dim_fan": "[80.8, 80.8, 25]",
+            "distx_screw": "4.5",
+            "height_cylinder": "30",
+            "object": "cable_box_top",
+            "wall_adapter": "4",
+            "wall_cable_box": "2"
+        },
+        "92mm_108mm_adapter": {
+            "$fn": "128",
+            "dia_cable": "6.3",
+            "dia_cylinder": "108",
+            "dia_screw": "4.4",
+            "dia_screw_cable_box": "3.5",
+            "dim_fan": "[92.8, 92.8, 40]",
+            "distx_screw": "4.5",
+            "height_cylinder": "50",
+            "object": "adapter",
+            "wall_adapter": "4",
+            "wall_cable_box": "2"
+        },
+        "92mm_108mm_cable_box_top": {
+            "$fn": "128",
+            "dia_cable": "6.3",
+            "dia_cylinder": "108",
+            "dia_screw": "4.4",
+            "dia_screw_cable_box": "3.5",
+            "dim_fan": "[92.8, 92.8, 40]",
+            "distx_screw": "4.5",
+            "height_cylinder": "50",
+            "object": "cable_box_top",
+            "wall_adapter": "4",
+            "wall_cable_box": "2"
+        }
+    },
+    "fileFormatVersion": "1"
+}

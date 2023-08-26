@@ -1,6 +1,6 @@
 $fn=128;
 
-object="cable_box_top";
+object="adapter";
 
 dim_fan = [92.8,92.8,40];
 wall_adapter = 4;
@@ -9,7 +9,7 @@ dia_cylinder = 108;
 dia_screw = 4.4;
 distx_screw = 4.5;
 disty_screw = distx_screw;
-dim_cable_box = [60,20,dim_fan[2]+wall_adapter ];
+dim_cable_box = [dim_fan[0]+wall_adapter,30,dim_fan[2]+wall_adapter ];
 wall_cable_box = 2;
 dia_cable = 6.3;
 dia_screw_cable_box = 3.5;
@@ -40,11 +40,11 @@ module part_adapter()
         }
         screw_holes_adapter(dia_screw,distx_screw,disty_screw,wall_adapter,dim_adapter);
         screw_holes_cable_box(mode="subtractive");
-        translate([dia_cable/2+2*wall_adapter,wall_adapter,dim_cable_box[2]/2])
+        translate([dia_cable/2+wall_adapter,wall_adapter,dim_cable_box[2]/2-2])
         {
             rotate([90,0,0])
             {
-                #cylinder(d=dia_cable,h=wall_adapter);
+               # cylinder(d=dia_cable,h=wall_adapter);
             }
         }
     } 
@@ -95,11 +95,11 @@ module screw_holes_cable_box(mode="subtractive")
                 {
                     translate(i)
                     {
-                        #cylinder(d=dia_screw_cable_box+wall_cable_box,h=dim_cable_box[1]);
-                        #cylinder(d=dia_head+2*wall_cable_box,h=dia_screw_cable_box+wall_cable_box);
+                        cylinder(d=dia_screw_cable_box+wall_cable_box,h=dim_cable_box[1]);
+                        cylinder(d=dia_head+2*wall_cable_box,h=dia_screw_cable_box+wall_cable_box);
                         translate([0,0,dim_cable_box[1]-dia_screw_cable_box-wall_cable_box])
                         {
-                            #cylinder(d=dia_head+2*wall_cable_box,h=dia_screw_cable_box+wall_cable_box);
+                            cylinder(d=dia_head+2*wall_cable_box,h=dia_screw_cable_box+wall_cable_box);
                         }
                     }
                 }
@@ -169,12 +169,12 @@ module cable_box(part="bottom")
             }
             translate([wall_cable_box,wall_cable_box,wall_cable_box])
             {
-                #cube_round(dim_cable_box
+                cube_round(dim_cable_box
                            -[2*wall_cable_box,wall_cable_box+wall_adapter,2*wall_cable_box],plane="yz");
             }
             translate([dim_cable_box[0]-wall_cable_box,
                       -dia_cable/2+dim_cable_box[1]-wall_adapter,
-                      dim_cable_box[2]/2])
+                      dim_cable_box[2]/2-2])
             {
                 rotate([0,90,0])
                 {
