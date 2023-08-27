@@ -78,7 +78,10 @@ void notifyClients() {
                \n\t\"flow_rate\": \"" + String(flowRate) +"\",\
                \n\t\"flow_quantity\": \"" + String(totalMilliLitres) +"\",\
                \n\t\"spray_period\": \"" + String(spray_period) +"\",\
-               \n\t\"spray_duration\": \"" + String(spray_duration) +"\"\n}");
+               \n\t\"spray_duration\": \"" + String(spray_duration) +"\",\
+               \n\t\"dhtValueTemp\": \"" + String(dhtValueTemp) +"\",\
+               \n\t\"dhtValueHumidity\": \"" + String(dhtValueHumidity) +"\"\
+               \n}");
 }
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
@@ -270,6 +273,12 @@ String processor(const String& var){
   else if(var == "LIGHT_OFF"){
     return String(light_off);
   }
+  else if(var == "DHT_TEMP_VALUE"){
+    return String(dhtValueTemp);
+  }
+  else if(var == "DHT_HUMIDITY_VALUE"){
+    return String(dhtValueHumidity);
+  }
   else {
     D_PRINTLN("template: Unknown variable");
     return String("  [processor] Unknown variable");
@@ -452,6 +461,7 @@ void getDhtValue() {
     D_PRINTLN(dhtValueTemp);
     D_PRINT("  [getDhtValue] DHT Humidity:");
     D_PRINTLN(dhtValueHumidity);
+    notifyClients();
   }
 }
 

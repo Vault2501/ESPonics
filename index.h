@@ -124,6 +124,16 @@ const char index_html[] PROGMEM = R"rawliteral(
      color:#8c8c8c;
      font-weight: bold;
   }
+    .dhtValueTemp {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .dhtValueHumidity {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
   </style>
 <title>Garden</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -167,8 +177,13 @@ const char index_html[] PROGMEM = R"rawliteral(
   </div>
 
   <div id="Sensors" class="tabcontent">
-    <h2>Sensors</h2>
+    <div class="card">
+      <h2>DHT Temperature</h2>
+      <p class="dhtValueTemp">State: <span id="dhtValueTemp">%DHT_TEMP_VALUE%</span></p>
 
+      <h2>DHT Humidity</h2>
+      <p class="dhtValueHumidity">State: <span id="dhtValueHumidity">%DHT_HUMIDITY_VALUE%</span></p>
+    </div>
   </div>
 
   <div id="FansLight" class="tabcontent">
@@ -334,6 +349,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('flow_quantity').innerHTML = garden.flow_quantity;
     document.getElementById('spray_period').innerHTML = garden.spray_period;
     document.getElementById('spray_duration').innerHTML = garden.spray_duration;
+    document.getElementById('dhtValueTemp').innerHTML = garden.dhtValueTemp;
+    document.getElementById('dhtValueHumidity').innerHTML = garden.dhtValueHumidity;
   }
   function onLoad(event) {
     initButtons();
