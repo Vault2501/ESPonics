@@ -85,8 +85,8 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
-    Serial.println("Data received: ");
-    Serial.println((char*)data);
+    D_PRINTLN("Data received: ");
+    D_PRINTLN((char*)data);
 
     DynamicJsonDocument garden_command(1024);
     DeserializationError error = deserializeJson(garden_command, data);
@@ -97,16 +97,16 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     }
 
     const char* command_type = garden_command["type"];
-    Serial.print("Command type: ");
-    Serial.println(command_type);
+    D_PRINT("  [handleWebSocketMessage] Command type: ");
+    D_PRINTLN(command_type);
 
     const char* command_item = garden_command["item"];
-    Serial.print("Command item: ");
-    Serial.println(command_item);
+    D_PRINT("  [handleWebSocketMessage] Command item: ");
+    D_PRINTLN(command_item);
 
     unsigned long int command_value = garden_command["value"];
-    Serial.print("Command value: ");
-    Serial.println(command_value);
+    D_PRINT("  [handleWebSocketMessage] Command value: ");
+    D_PRINTLN(command_value);
 
     if (strcmp(command_type, "toggle") == 0) {
       if (strcmp(command_item, "pump1") == 0) {
@@ -131,6 +131,9 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       }
       if (strcmp(command_item, "scheduler") == 0) {
         scheduler_active = !scheduler_active;
+        preferences.begin("garden", false);
+        preferences.putBool("scheduler", scheduler_active);
+        preferences.end();
         notifyClients();
       }
       if (strcmp(command_item, "fan1") == 0) {
@@ -142,7 +145,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         notifyClients();
       }
       if (strcmp(command_item, "light") == 0) {
-        Serial.println("light toggle command");
+        D_PRINTLN("  [handleWebSocketMessage] light toggle command");
         light_toggle = 0;
         light_state = !light_state;
         scheduler_active = 0;
@@ -268,8 +271,8 @@ String processor(const String& var){
     return String(light_off);
   }
   else {
-    Serial.println("template: Unknown variable");
-    return String("Unknown variable");
+    D_PRINTLN("template: Unknown variable");
+    return String("  [processor] Unknown variable");
   }
 }
 
@@ -283,8 +286,8 @@ void setPumpState() {
 }
 
 void enableSpray() {
-  Serial.print("Enabling spray ");
-  Serial.println(active_pump);
+  D_PRINT("  [enableSpray] Enabling spray ");
+  D_PRINTLN(active_pump);
   if (active_pump == 1) {
     pump1_state = 0;
   }
@@ -297,8 +300,8 @@ void enableSpray() {
 };
 
 void disableSpray() {
-  Serial.print("Disabling Spray ");
-  Serial.println(active_pump);
+  D_PRINT("  [disableSpray] Disabling Spray ");
+  D_PRINTLN(active_pump);
   if (active_pump == 1) {
     pump1_state = 1;
   }
@@ -329,12 +332,12 @@ void setFanState()
 
 void setFanPwm(int pin, int duty)
 {
-  Serial.print("Setting PWM ");
-  Serial.print(pin);
-  Serial.print(" to ");
-  Serial.println(duty);
+  D_PRINT("  [setFanPwm] Setting PWM ");
+  D_PRINT(pin);
+  D_PRINT(" to ");
+  D_PRINT(duty);
   int dutyCycle = (duty * 255) / 100;
-  Serial.println(dutyCycle);
+  D_PRINTLN(dutyCycle);
   ledcWrite(fanChannel, dutyCycle);
   //analogWrite(pin, (duty / 100) * 1023);
 }
@@ -361,14 +364,14 @@ void setLightState()
     if (light_state == 1)
     {
       // Turn light off
-      Serial.println("Turning light off");
+      D_PRINTLN("  [setLightState] Turning light off");
       mySwitch.switchOff(UnitecRCSwitch::SOCKET_A);
     }
 
     if (light_state == 0)
     {
       // Turn light on
-      Serial.println("Turning light on");
+      D_PRINTLN("  [setLightState] Turning light on");
       mySwitch.switchOn(UnitecRCSwitch::SOCKET_A);
     }
     light_toggle = !light_toggle;
@@ -376,7 +379,7 @@ void setLightState()
 }
 
 void enableLight() {
-  Serial.println("Enabling light");
+  D_PRINTLN("  [enableLight] Enabling light");
   light_state = 0;
   light_toggle = 0;
   notifyClients();
@@ -384,7 +387,7 @@ void enableLight() {
 };
 
 void disableLight() {
-  Serial.println("Disabling Light ");
+  D_PRINTLN("  [disableLight] Disabling Light ");
   light_state = 1;
   light_toggle = 0;
   notifyClients();
@@ -399,8 +402,8 @@ void IRAM_ATTR pulseCounter()
 }
 
 void getFlowRate() {
-  //currentMillis = millis();
-  //if (currentMillis - previousMillis > interval) {
+  currentFlowMillis = millis();
+  if (currentFlowMillis - previousFlowMillis > interval) {
     
     pulse1Sec = pulseCount;
     pulseCount = 0;
@@ -410,8 +413,8 @@ void getFlowRate() {
     // that to scale the output. We also apply the calibrationFactor to scale the output
     // based on the number of pulses per second per units of measure (litres/minute in
     // this case) coming from the sensor.
-    flowRate = ((1000.0 / (millis() - previousMillis)) * pulse1Sec) / calibrationFactor;
-    //previousMillis = millis();
+    flowRate = ((1000.0 / (millis() - previousFlowMillis)) * pulse1Sec) / calibrationFactor;
+    previousFlowMillis = millis();
 
     // Divide the flow rate in litres/minute by 60 to determine how many litres have
     // passed through the sensor in this 1 second interval, then multiply by 1000 to
@@ -433,7 +436,7 @@ void getFlowRate() {
     //Serial.print("mL / ");
     //Serial.print(totalMilliLitres / 1000);
     //Serial.println("L");
-  //}
+  }
 }
 
 
@@ -445,10 +448,10 @@ void getDhtValue() {
     Serial.println(F("Failed to read from DHT sensor!"));
     return;
   } else {
-    Serial.print("DHT Temperature:");
-    Serial.println(dhtValueTemp);
-    Serial.print("DHT Humidity:");
-    Serial.println(dhtValueHumidity);
+    D_PRINT("  [getDhtValue] DHT Temperature:");
+    D_PRINTLN(dhtValueTemp);
+    D_PRINT("  [getDhtValue] DHT Humidity:");
+    D_PRINTLN(dhtValueHumidity);
   }
 }
 
@@ -459,8 +462,8 @@ void getTempValue() {
     Serial.println(F("Failed to read from 18B20 sensor!"));
     return;
   } else {
-    Serial.print("18B20 Temperature:");
-    Serial.println(dhtValueTemp);
+    D_PRINT("  [getTempValue] 18B20 Temperature:");
+    D_PRINTLN(dhtValueTemp);
   }
 }
 
@@ -468,21 +471,21 @@ void getTempValue() {
 void getWaterState() {
   water_state = digitalRead(level_pin);
   if( water_state == HIGH)  {
-    Serial.println("Water ok");
+    D_PRINTLN("  [getWaterState] Water ok");
   } else {
-    Serial.println("Water low");
+    D_PRINTLN("  [getWaterState] Water low");
   }
 }
 
 void readSensors() {
   currentMillis = millis();
   if (currentMillis - previousMillis > interval) {
+    D_PRINTLN("  [readSensors] Reading Sensors");
     //getWaterState();
-    getTempValue();
-    //getDhtValue();
-    getFlowRate();
+    //getTempValue();
+    getDhtValue();
+    previousMillis = millis();
   }
-  previousMillis = millis();
 }
 
 //////////////////////////////////////////////
@@ -584,7 +587,7 @@ void setup() {
   flowRate = 0.0;
   flowMilliLitres = 0;
   totalMilliLitres = 0;
-  previousMillis = 0;
+  //previousMillis = 0;
   attachInterrupt(digitalPinToInterrupt(flow_pin), pulseCounter, FALLING);
 
   // setup fan pwm
@@ -603,6 +606,7 @@ void setup() {
   spray_duration = preferences.getULong("spray_duration", 1000);
   light_on = preferences.getULong("light_on", 12);
   light_off = preferences.getULong("light_off", 12);
+  scheduler_active = preferences.getBool("scheduler", 0);
   preferences.end();
 
   // setup Scheduler intervals for pumps
@@ -632,7 +636,7 @@ void loop() {
   if (scheduler_active == 1) {
     ts.execute();
   }
-  //getFlowRate();
+  getFlowRate();
   setPumpState();
   setValveState();
   setFanState();
