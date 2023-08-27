@@ -80,7 +80,11 @@ void notifyClients() {
                \n\t\"spray_period\": \"" + String(spray_period) +"\",\
                \n\t\"spray_duration\": \"" + String(spray_duration) +"\",\
                \n\t\"dhtValueTemp\": \"" + String(dhtValueTemp) +"\",\
-               \n\t\"dhtValueHumidity\": \"" + String(dhtValueHumidity) +"\"\
+               \n\t\"dhtValueHumidity\": \"" + String(dhtValueHumidity) +"\",\
+               \n\t\"dallasValueTemp\": \"" + String(dallasValueTemp) +"\",\
+               \n\t\"ph_value\": \"" + String(ph_value) +"\",\
+               \n\t\"ec_value\": \"" + String(ec_value) +"\",\
+               \n\t\"water_state\": \"" + String(water_state) +"\"\
                \n}");
 }
 
@@ -279,6 +283,21 @@ String processor(const String& var){
   else if(var == "DHT_HUMIDITY_VALUE"){
     return String(dhtValueHumidity);
   }
+  else if(var == "DALLAS_TEMP_VALUE"){
+    return String(dallasValueTemp);
+  }
+  else if(var == "WATER_STATE"){
+    return String(water_state);
+  }
+  else if(var == "PH_VALUE"){
+    return String(ph_value);
+  }
+  else if(var == "EC_VALUE"){
+    return String(ec_value);
+  }
+  else if(var == "WATER_STATE"){
+    return String(water_state);
+  }
   else {
     D_PRINTLN("template: Unknown variable");
     return String("  [processor] Unknown variable");
@@ -461,7 +480,6 @@ void getDhtValue() {
     D_PRINTLN(dhtValueTemp);
     D_PRINT("  [getDhtValue] DHT Humidity:");
     D_PRINTLN(dhtValueHumidity);
-    notifyClients();
   }
 }
 
@@ -473,7 +491,29 @@ void getTempValue() {
     return;
   } else {
     D_PRINT("  [getTempValue] 18B20 Temperature:");
-    D_PRINTLN(dhtValueTemp);
+    D_PRINTLN(dallasValueTemp);
+  }
+}
+
+// ph value
+void getPhValue() {
+  if (isnan(ph_value)) {
+    Serial.println(F("Failed to read from ph sensor!"));
+    return;
+  } else {
+    D_PRINT("  [getPhValue] ph value:");
+    D_PRINTLN(ph_value);
+  }
+}
+
+// ph value
+void getEcValue() {
+  if (isnan(ec_value)) {
+    Serial.println(F("Failed to read from ec sensor!"));
+    return;
+  } else {
+    D_PRINT("  [getEcValue] ec value:");
+    D_PRINTLN(ec_value);
   }
 }
 
@@ -494,6 +534,10 @@ void readSensors() {
     //getWaterState();
     //getTempValue();
     getDhtValue();
+    //getEcValue;
+    //getPhValue;
+
+    notifyClients();
     previousMillis = millis();
   }
 }

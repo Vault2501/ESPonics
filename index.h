@@ -1,135 +1,155 @@
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 <head>
-  <title>ESP Geiger Counter</title>
+  <title>ESPonics</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-  body {
-    margin: 0;
-  }
-  html {
-    font-family: Arial, Helvetica, sans-serif;
-    text-align: center;
-  }
-  h1 {
-    font-size: 1.8rem;
-    color: white;
-  }
-  h2{
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #143642;
-  }
-  .topnav {
-    overflow: hidden;
-    background-color: #143642;
-  }
-  .tab button {
-  background-color: inherit;
-  float: left;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  transition: 0.3s;
-  font-size: 17px;
-  }
-  .tab button:hover {
-  background-color: #ddd;
-  }
-  .tab button.active {
-  background-color: #ccc;
-  }
-  .tabcontent {
-  display: none;
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-top: none;
-  }
-  .tab {
-  overflow: hidden;
-  border: 1px solid #ccc;
-  background-color: #f1f1f1;
-  }
-  .card {
-    background-color: #F8F7F9;;
-    box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
-    padding-top:10px;
-    padding-bottom:20px;
-  }
-  .button {
-    padding: 15px 50px;
-    font-size: 24px;
-    text-align: center;
-    outline: none;
-    color: #fff;
-    background-color: #0f8b8d;
+    body {
+      margin: 0;
+    }
+    html {
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: white;
+    }
+    h2{
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #143642;
+    }
+    .topnav {
+      overflow: hidden;
+      background-color: #143642;
+    }
+    .tab button {
+    background-color: inherit;
+    float: left;
     border: none;
-    border-radius: 5px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-  }
-  .button:active {
-     background-color: #0f8b8d;
-     box-shadow: 2 2px #CDCDCD;
-     transform: translateY(2px);
-  }
-  .pump1_state {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-  }
-  .pump2_state {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-  }
-  .valve1_state {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-  }
-  .valve2_state {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-  }
-  .flow_rate {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-  }
-  .flow_quantity {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-  }
-  .spray_period {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-  }
-  .spray_duration {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-  }
-  .fan1_speed {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-  }
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    }
+    .tab button:hover {
+    background-color: #ddd;
+    }
+    .tab button.active {
+    background-color: #ccc;
+    }
+    .tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+    }
+    .tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    }
+    .card {
+      background-color: #F8F7F9;;
+      box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+      padding-top:10px;
+      padding-bottom:20px;
+    }
+    .button {
+      padding: 15px 50px;
+      font-size: 24px;
+      text-align: center;
+      outline: none;
+      color: #fff;
+      background-color: #0f8b8d;
+      border: none;
+      border-radius: 5px;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+    }
+    .button:active {
+      background-color: #0f8b8d;
+      box-shadow: 2 2px #CDCDCD;
+      transform: translateY(2px);
+    }
+    .pump1_state {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .pump2_state {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .valve1_state {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .valve2_state {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .flow_rate {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .flow_quantity {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .spray_period {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .spray_duration {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .fan1_speed {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
     .dhtValueTemp {
       font-size: 1.5rem;
       color:#8c8c8c;
       font-weight: bold;
     }
+    .dallasValueTemp {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
     .dhtValueHumidity {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .water_state {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .ph_value {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .ec_value {
       font-size: 1.5rem;
       color:#8c8c8c;
       font-weight: bold;
@@ -183,6 +203,18 @@ const char index_html[] PROGMEM = R"rawliteral(
 
       <h2>DHT Humidity</h2>
       <p class="dhtValueHumidity">State: <span id="dhtValueHumidity">%DHT_HUMIDITY_VALUE%</span></p>
+
+      <h2>Dallas Temperature</h2>
+      <p class="dallasValueTemp">State: <span id="dallasValueTemp">%DALLAS_TEMP_VALUE%</span></p>
+
+      <h2>ph Value</h2>
+      <p class="ph_value">State: <span id="ph_value">%PH_VALUE%</span></p>
+
+      <h2>ec Value</h2>
+      <p class="ec_value">State: <span id="ec_value">%EC_VALUE%</span></p>
+
+      <h2>Water State</h2>
+      <p class="water_state">State: <span id="water_state">%WATER_STATE%</span></p>
     </div>
   </div>
 
@@ -333,6 +365,12 @@ const char index_html[] PROGMEM = R"rawliteral(
     else{
       scheduler_active_display = "INACTIVE";
     }
+    if (water_state == "1"){
+      water_state_display = "OK";
+    }
+    else {
+      water_state_display = "LOW";
+    }
     document.getElementById('pump1_state').innerHTML = pump1_state_display;
     document.getElementById('pump2_state').innerHTML = pump2_state_display;
     document.getElementById('valve1_state').innerHTML = valve1_state_display;
@@ -351,6 +389,10 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('spray_duration').innerHTML = garden.spray_duration;
     document.getElementById('dhtValueTemp').innerHTML = garden.dhtValueTemp;
     document.getElementById('dhtValueHumidity').innerHTML = garden.dhtValueHumidity;
+    document.getElementById('dallasValueTemp').innerHTML = garden.dallasValueTemp;
+    document.getElementById('ph_value').innerHTML = garden.ph_value;
+    document.getElementById('ec_value').innerHTML = garden.ec_value;
+    document.getElementById('water_state').innerHTML = water_state_display;
   }
   function onLoad(event) {
     initButtons();

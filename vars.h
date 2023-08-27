@@ -1,5 +1,15 @@
-#define DEBUG 1
+#define DEBUG
 #define DHTTYPE DHT22
+
+#ifdef DEBUG
+ #define D_PRINT(x)     Serial.print (x)
+ #define D_PRINTDEC(x)     Serial.print (x, DEC)
+ #define D_PRINTLN(x)  Serial.println (x)
+#else
+ #define D_PRINT(x)
+ #define D_PRINTDEC(x)
+ #define D_PRINTLN(x)
+#endif
 
 
 const char* myhostname = "esponics";
@@ -50,7 +60,7 @@ const int rf_pin = 13;
 
 // sensor box pins
 const int temp_pin = 39;
-const int dht_pin = 36;
+const int dht_pin = 26;
 const int ec_pin = 35;
 const int ph_pin = 34;
 const int level_pin = 33;
@@ -58,11 +68,11 @@ const int level_pin = 33;
 // sensor vars
 float dhtValueTemp = 0;
 float dhtValueHumidity = 0;
-float dallasValueTemp;
+float dallasValueTemp = 0;
+float ph_value = 7;
+float ec_value = 0;
 
 // flow meter vars
-long currentMillis = 0;
-long previousMillis = 0;
 int interval = 1000;
 float calibrationFactor = 4.5;
 volatile byte pulseCount;
@@ -70,3 +80,9 @@ byte pulse1Sec = 0;
 float flowRate;
 unsigned int flowMilliLitres;
 unsigned long totalMilliLitres;
+
+// timing
+long currentMillis = 0;
+long previousMillis = 0;
+long currentFlowMillis = 0;
+long previousFlowMillis = 0;
