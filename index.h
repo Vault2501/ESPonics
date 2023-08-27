@@ -155,14 +155,14 @@ const char index_html[] PROGMEM = R"rawliteral(
       font-weight: bold;
     }
   </style>
-<title>Garden</title>
+<title>ESPonics</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
 </head>
 <body>
   
   <div class="topnav">
-    <h1>Garden</h1>
+    <h1>ESPonics</h1>
   </div>
 
   <div class="tab">
