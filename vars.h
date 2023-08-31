@@ -59,11 +59,11 @@ const int fanpwm1_pin = 25;
 const int rf_pin = 13;
 
 // sensor box pins
-const int temp_pin = 39;
+const int temp_pin = 23;
 const int dht_pin = 26;
 const int ec_pin = 35;
 const int ph_pin = 34;
-const int level_pin = 33;
+const int level_pin = 22;
 
 // sensor vars
 float dhtValueTemp = 0;

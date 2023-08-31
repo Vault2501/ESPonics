@@ -485,6 +485,7 @@ void getDhtValue() {
 
 // 18B20 Temperature
 void getTempValue() {
+  temp_sensor.requestTemperatures();
   dallasValueTemp = temp_sensor.getTempCByIndex(0);
   if (isnan(dallasValueTemp)) {
     Serial.println(F("Failed to read from 18B20 sensor!"));
@@ -519,11 +520,13 @@ void getEcValue() {
 
 // water level
 void getWaterState() {
-  water_state = digitalRead(level_pin);
-  if( water_state == HIGH)  {
+  bool state = digitalRead(level_pin);
+  if( state == LOW)  {
     D_PRINTLN("  [getWaterState] Water ok");
+    water_state = 1;
   } else {
     D_PRINTLN("  [getWaterState] Water low");
+    water_state = 0;
   }
 }
 
@@ -531,8 +534,8 @@ void readSensors() {
   currentMillis = millis();
   if (currentMillis - previousMillis > interval) {
     D_PRINTLN("  [readSensors] Reading Sensors");
-    //getWaterState();
-    //getTempValue();
+    getWaterState();
+    getTempValue();
     getDhtValue();
     //getEcValue;
     //getPhValue;

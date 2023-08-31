@@ -365,7 +365,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     else{
       scheduler_active_display = "INACTIVE";
     }
-    if (water_state == "1"){
+    if (garden.water_state == "1"){
       water_state_display = "OK";
     }
     else {
