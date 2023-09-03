@@ -73,13 +73,13 @@ float ph_value = 7;
 float ec_value = 0;
 
 // calibration values
-const int phSampleSize = 10;
-float ph_analog_401;
-float ph_analog_686;
-float ph_value_401;
-float ph_value_686;
-float ph_calibration_b;
-float ph_calibration_m;
+const int phSampleSize = 10;  
+int ph_analog_686 = -1;
+int ph_analog_401 = -1;
+int ph_analog = 0;
+float ph_calibration_b=0;
+float ph_calibration_m=1;
+bool ph_calibrated = false;
 
 // flow meter vars
 int interval = 1000;

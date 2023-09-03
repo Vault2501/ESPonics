@@ -12,7 +12,6 @@
 #include <Preferences.h>
 #include "wifi.h"
 #include "index.h"
-#include "calibrate.h"
 #include "vars.h"
 
 
@@ -83,6 +82,8 @@ void notifyClients() {
                \n\t\"dhtValueHumidity\": \"" + String(dhtValueHumidity) +"\",\
                \n\t\"dallasValueTemp\": \"" + String(dallasValueTemp) +"\",\
                \n\t\"ph_value\": \"" + String(ph_value) +"\",\
+               \n\t\"ph_calibrated\": \"" + String(ph_calibrated) +"\",\
+               \n\t\"ph_analog\": \"" + String(ph_analog) +"\",\
                \n\t\"ec_value\": \"" + String(ec_value) +"\",\
                \n\t\"water_state\": \"" + String(water_state) +"\"\
                \n}");
@@ -296,6 +297,12 @@ String processor(const String& var){
   else if(var == "PH_VALUE"){
     return String(ph_value);
   }
+  else if(var == "PH_ANALOG"){
+    return String(ph_analog);
+  }
+  else if(var == "PH_CALIBRATED"){
+    return String(ph_calibrated);
+  }
   else if(var == "EC_VALUE"){
     return String(ec_value);
   }
@@ -502,9 +509,16 @@ void getTempValue() {
 
 // ph value
 void getPhValue(float ph_calibration_m, float ph_calibration_b) {   
-  int phAnalog = readPhAnalog(phSampleSize, ph_pin);
-  float pHVoltage = analog2Voltage(phAnalog);
-  float phValue = voltage2Ph(pHVoltage, ph_calibration_m, ph_calibration_b);
+  ph_analog = readPhAnalog(phSampleSize, ph_pin);
+  float ph_voltage = analog2Voltage(ph_analog);
+  ph_value = voltage2Ph(ph_voltage, ph_calibration_m, ph_calibration_b);
+
+  D_PRINT("  [getPhAnalog]: ");
+  D_PRINTLN(ph_analog);
+  D_PRINT("  [getPhVoltage]: ");
+  D_PRINTLN(ph_voltage);
+  D_PRINT("  [getPhValue]: ");
+  D_PRINTLN(ph_value);
 }
 
 void sortArray(int* array, int size) {
@@ -572,11 +586,50 @@ float voltage2Ph(float voltage, float cal_m, float cal_b) {
   return phValue;
 }
 
-void calibratePh(int ph_calib) {
-  float ph = ph_calib/100;
-  D_PRINT("  [calibratePh] ph: ");
-  D_PRINTLN(ph);
+bool isCalibrated() {
+  if (ph_calibration_m != 1 && ph_calibration_b != 0){
+    return true;
+  }
+  else {
+    return false;
+  }
+}
 
+void calcCalibration(float ph1, float ph2, float phAnalog1, float phAnalog2) {
+  ph_calibration_m = (ph2 - ph1) / (phAnalog2 - phAnalog1);
+  ph_calibration_b = ph1 - (ph_calibration_m * phAnalog1);
+  D_PRINT("  [calcCalibration] ph_calibration_b: ");
+  D_PRINTLN(ph_calibration_b);
+  D_PRINT("  [calcCalibration] ph_calibration_m: ");
+  D_PRINTLN(ph_calibration_m);
+}
+
+
+void calibratePh(int ph_calib) {
+  while (Serial.available() <= 0) {}
+  if(ph_calib == 401) {
+    ph_analog_401 = readPhAnalog(phSampleSize,ph_pin);
+    D_PRINT("  [calibratePh] ph_analog_401: ");
+    D_PRINTLN(ph_analog_401);  
+  }
+  else if(ph_calib == 686) {
+    ph_analog_686 = readPhAnalog(phSampleSize,ph_pin);
+    D_PRINT("  [calibratePh] ph_analog_686: ");
+    D_PRINTLN(ph_analog_686);
+  }
+  else {
+    Serial.print("Unknown ph calibration value: ");
+    Serial.println(ph_calib);
+  }
+  if (ph_analog_401 != -1 && ph_analog_686 != -1) {
+    calcCalibration(4.01, 6.86, ph_analog_401, ph_analog_686);
+    preferences.begin("garden", false);
+    preferences.putULong("ph_calibration_b", ph_calibration_b);
+    preferences.putULong("ph_calibration_m", ph_calibration_m);
+    preferences.end();
+    ph_analog_401 = -1;
+    ph_analog_686 = -1;
+  }
 }
 
 // ecc value
@@ -610,7 +663,7 @@ void readSensors() {
     getTempValue();
     getDhtValue();
     //getEcValue;
-    //getPhValue;
+    getPhValue(ph_calibration_m, ph_calibration_b);
 
     notifyClients();
     previousMillis = millis();
@@ -740,6 +793,9 @@ void setup() {
   ph_calibration_m = preferences.getFloat("ph_calibration_m", 1);
   preferences.end();
 
+  // check for calibration
+  ph_calibrated=isCalibrated();
+
   // setup Scheduler intervals for pumps
   tPump.setInterval(spray_period * TASK_MILLISECOND);
   tPumpOff.setInterval(spray_duration * TASK_MILLISECOND);
@@ -754,10 +810,6 @@ void setup() {
     request->send_P(200, "text/html", index_html, processor);
   });
 
-  server.on("/calibrate", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", calibrate_html, processor);
-  });
-
   // start webserver
   server.begin();
 }
@@ -767,13 +819,12 @@ void loop() {
   if (scheduler_active == 1) {
     ts.execute();
   }
+
   getFlowRate();
   setPumpState();
   setValveState();
   setFanState();
   //setLightState();
-  //getDhtValue();
-  //getWaterState();
   readSensors();
 }
 

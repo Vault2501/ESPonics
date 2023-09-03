@@ -149,6 +149,16 @@ const char index_html[] PROGMEM = R"rawliteral(
       color:#8c8c8c;
       font-weight: bold;
     }
+    .ph_analog {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .ph_calibrated {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
     .ec_value {
       font-size: 1.5rem;
       color:#8c8c8c;
@@ -277,19 +287,18 @@ const char index_html[] PROGMEM = R"rawliteral(
   </div>
 
   <div id="Calibrate" class="tabcontent">
-    <div class="card">
+    <div class="card">    
+      <p class="ph_calibrated">State: <span id="ph_calibrated">%PH_CALIBRATED%</span></p>
+      <p class "ph_analog">PH Analog Value: <span id="ph_analog">%PH_ANALOG%</span></p>
+
       <h2>Calibrate pH 4.01</h2>
-      <p class "calibrate_ph401">State: <span id="calibrate_ph401_state">%CALIBRATION_PH401_STATE%</span></p>
       <p>Put ph sensor in calibration liquid with ph 4.01 and wait until the value does not change anymore.
          Then click the calibrate button</p>
-      <p class "ph401_value">Value: <span id="ph401_value">%PH401_VALUE%</span></p>
       <p><button id="calibrate_ph401_button" class="button">Calibrate</button></p>
 
       <h2>Calibrate pH 6.86</h2>
-      <p class "calibrate_ph686">State: <span id="calibrate_ph686_state">%CALIBRATION_PH686_STATE%</span></p>
       <p>Put ph sensor in calibration liquid with ph 6.86 and wait until the value does not change anymore.
          Then click the calibrate button</p>
-      <p class "ph686_value">Value: <span id="ph686_value">%PH686_VALUE%</span></p>
       <p><button id="calibrate_ph686_button" class="button">Calibrate</button></p>      
     </div>
   </div>
@@ -390,6 +399,12 @@ const char index_html[] PROGMEM = R"rawliteral(
     else {
       water_state_display = "LOW";
     }
+    if (garden.ph_calibrated == true) {
+      ph_calibrated_display == "CALIBRATED";
+    }
+    else {
+      ph_calibrated_display == "UNCALIBRATED";
+    }
     document.getElementById('pump1_state').innerHTML = pump1_state_display;
     document.getElementById('pump2_state').innerHTML = pump2_state_display;
     document.getElementById('valve1_state').innerHTML = valve1_state_display;
@@ -410,6 +425,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('dhtValueHumidity').innerHTML = garden.dhtValueHumidity;
     document.getElementById('dallasValueTemp').innerHTML = garden.dallasValueTemp;
     document.getElementById('ph_value').innerHTML = garden.ph_value;
+    document.getElementById('ph_analog').innerHTML = garden.ph_401_analog;
+    document.getElementById('ph_calibrated').innerHTML = ph_calibrated_display;
     document.getElementById('ec_value').innerHTML = garden.ec_value;
     document.getElementById('water_state').innerHTML = water_state_display;
   }
