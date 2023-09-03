@@ -72,6 +72,10 @@ float dallasValueTemp = 0;
 float ph_value = 7;
 float ec_value = 0;
 
+// calibration values
+float ph_analog_401;
+float ph_analog_686;
+
 // flow meter vars
 int interval = 1000;
 float calibrationFactor = 4.5;

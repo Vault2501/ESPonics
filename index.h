@@ -170,6 +170,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <button class="tablinks" onclick="openTab(event, 'Sensors')">Sensors</button>
     <button class="tablinks" onclick="openTab(event, 'FansLight')">Fans and Light</button>
     <button class="tablinks" onclick="openTab(event, 'Scheduler')">Scheduler</button>
+    <button class="tablinks" onclick="openTab(event, 'Calibrate')">Calibrate</button>
   </div>
   
   <div id="Pumps" class="tabcontent">
@@ -272,6 +273,24 @@ const char index_html[] PROGMEM = R"rawliteral(
         New value: <input type="text" id="new_spray_duration" value="%SPRAY_DURATION%">
         <button id="update_spray_duration_button" class="button">Update</button>
       </p>
+    </div>
+  </div>
+
+  <div id="Calibrate" class="tabcontent">
+    <div class="card">
+      <h2>Calibrate pH 4.01</h2>
+      <p class "calibrate_ph401">State: <span id="calibrate_ph401_state">%CALIBRATION_PH401_STATE%</span></p>
+      <p>Put ph sensor in calibration liquid with ph 4.01 and wait until the value does not change anymore.
+         Then click the calibrate button</p>
+      <p class "ph401_value">Value: <span id="ph401_value">%PH401_VALUE%</span></p>
+      <p><button id="calibrate_ph401_button" class="button">Calibrate</button></p>
+
+      <h2>Calibrate pH 6.86</h2>
+      <p class "calibrate_ph686">State: <span id="calibrate_ph686_state">%CALIBRATION_PH686_STATE%</span></p>
+      <p>Put ph sensor in calibration liquid with ph 6.86 and wait until the value does not change anymore.
+         Then click the calibrate button</p>
+      <p class "ph686_value">Value: <span id="ph686_value">%PH686_VALUE%</span></p>
+      <p><button id="calibrate_ph686_button" class="button">Calibrate</button></p>      
     </div>
   </div>
 
@@ -412,6 +431,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('scheduler_button').addEventListener('click', toggle_scheduler);
     document.getElementById('update_spray_period_button').addEventListener('click', update_spray_period);
     document.getElementById('update_spray_duration_button').addEventListener('click', update_spray_duration);
+    document.getElementById('calibrate_ph401_button').addEventListener('click', calibrate_ph401);
+    document.getElementById('calibrate_ph686_button').addEventListener('click', calibrate_ph686);
   }
   function toggle_pump1() {
     garden_command.type = "toggle";
@@ -497,13 +518,28 @@ const char index_html[] PROGMEM = R"rawliteral(
     const garden_data = JSON.stringify(garden_command);
     websocket.send(garden_data);
   }
-    function update_spray_duration() {
+  function update_spray_duration() {
     garden_command.type = "update";
     garden_command.item = "spray_duration";
     garden_command.value = document.getElementById("new_spray_duration").value
     const garden_data = JSON.stringify(garden_command);
     websocket.send(garden_data);
   }
+  function calibrate_ph686() {
+    garden_command.type = "toggle";
+    garden_command.item = "calibrate_ph";
+    garden_command.value = 686;
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function calibrate_ph401() {
+    garden_command.type = "toggle";
+    garden_command.item = "calibrate_ph";
+    garden_command.value = 401;
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+
 </script>
 </body>
 </html>

@@ -158,6 +158,10 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         scheduler_active = 0;
         notifyClients();
       }
+      if (strcmp(command_item, "calibrate_ph") == 0) {
+        calibratePh(garden_command["value"]);
+        notifyClients();
+      }
     }
     if (strcmp(command_type, "update") == 0) {
       if (strcmp(command_item, "light_on") == 0) {
@@ -507,7 +511,11 @@ void getPhValue() {
   }
 }
 
-// ph value
+void calibratePh(int ph_calib) {
+
+}
+
+// ecc value
 void getEcValue() {
   if (isnan(ec_value)) {
     Serial.println(F("Failed to read from ec sensor!"));
@@ -664,6 +672,8 @@ void setup() {
   light_on = preferences.getULong("light_on", 12);
   light_off = preferences.getULong("light_off", 12);
   scheduler_active = preferences.getBool("scheduler", 0);
+  ph_analog_401 = preferences.getFloat("ph_analog_401", 1);
+  ph_analog_686 = preferences.getFloat("ph_analog_686", 1);
   preferences.end();
 
   // setup Scheduler intervals for pumps
