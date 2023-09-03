@@ -62,7 +62,7 @@ const int rf_pin = 13;
 const int temp_pin = 23;
 const int dht_pin = 26;
 const int ec_pin = 35;
-const int ph_pin = 34;
+const int ph_pin = A0;
 const int level_pin = 22;
 
 // sensor vars
