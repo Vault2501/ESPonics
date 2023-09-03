@@ -501,17 +501,81 @@ void getTempValue() {
 }
 
 // ph value
-void getPhValue() {
-  if (isnan(ph_value)) {
-    Serial.println(F("Failed to read from ph sensor!"));
-    return;
-  } else {
-    D_PRINT("  [getPhValue] ph value:");
-    D_PRINTLN(ph_value);
+void getPhValue(float ph_calibration_m, float ph_calibration_b) {   
+  int phAnalog = readPhAnalog(phSampleSize, ph_pin);
+  float pHVoltage = analog2Voltage(phAnalog);
+  float phValue = voltage2Ph(pHVoltage, ph_calibration_m, ph_calibration_b);
+}
+
+void sortArray(int* array, int size) {
+  int temp;
+  for(int i=0;i<(size-1);i++)
+  {
+    for(int j=i+1;j<size;j++)
+    {
+      if(array[i]>array[j])
+      {
+        temp=array[i];
+        array[i]=array[j];
+        array[j]=temp;
+      }
+    }
   }
 }
 
+int readPhAnalog(int sampleSize, int pin) {
+  // read sampleSize amount of values
+  int buf[sampleSize];
+  int sumValue=0;
+  int avgValue=0;
+  for(int i=0;i<sampleSize;i++) 
+  { 
+    for(int i=0;i<sampleSize;i++) 
+    { 
+      buf[i]=analogRead(pin);
+      D_PRINT("buf[");
+      D_PRINT(i);
+      D_PRINT("] = ");
+      D_PRINTLN(buf[i]);
+      delay(10);
+    }
+  }
+
+  sortArray(buf, sampleSize);
+
+  for(int i=0;i<sampleSize;i++) 
+  { 
+    Serial.print("buf[");
+    Serial.print(i);
+    Serial.print("] = ");
+    Serial.println(buf[i]);
+  }  
+  // ignore the lowest and highest 20% of the sample
+  int ignore=(int((sampleSize*20)/100));
+  for(int i=ignore;i<(sampleSize-ignore);i++){
+    sumValue+=buf[i];
+  }
+  avgValue = sumValue/(sampleSize-(2*ignore));
+  D_PRINT("avgValue = ");
+  D_PRINTLN(avgValue);
+
+  return avgValue;
+}
+
+float analog2Voltage(float analogValue) {
+  float voltage=(float)analogValue*(3.3/4095.0);
+  return voltage;
+}
+
+float voltage2Ph(float voltage, float cal_m, float cal_b) {
+  float phValue = cal_m * voltage + cal_b;
+  return phValue;
+}
+
 void calibratePh(int ph_calib) {
+  float ph = ph_calib/100;
+  D_PRINT("  [calibratePh] ph: ");
+  D_PRINTLN(ph);
 
 }
 
@@ -672,8 +736,8 @@ void setup() {
   light_on = preferences.getULong("light_on", 12);
   light_off = preferences.getULong("light_off", 12);
   scheduler_active = preferences.getBool("scheduler", 0);
-  ph_analog_401 = preferences.getFloat("ph_analog_401", 1);
-  ph_analog_686 = preferences.getFloat("ph_analog_686", 1);
+  ph_calibration_b = preferences.getFloat("ph_calibration_b", 1);
+  ph_calibration_m = preferences.getFloat("ph_calibration_m", 1);
   preferences.end();
 
   // setup Scheduler intervals for pumps
