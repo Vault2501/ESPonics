@@ -62,8 +62,8 @@ const int rf_pin = 13;
 const int temp_pin = 23;
 const int dht_pin = 26;
 const int ec_pin = 35;
-const int ph_pin = A0;
-const int level_pin = 22;
+const int ph_pin = 36; //A0, VP
+const int level_pin = 39; //A3. VN
 
 // sensor vars
 float dhtValueTemp = 0;
