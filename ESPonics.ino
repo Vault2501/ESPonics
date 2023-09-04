@@ -73,7 +73,7 @@ void notifyClients() {
                \n\t\"light_state\": \"" + String(light_state) +"\",\
                \n\t\"light_on\": \"" + String(light_on) +"\",\
                \n\t\"light_off\": \"" + String(light_off) +"\",\
-               \n\t\"scheduler_active\": \"" + String(scheduler_active) +"\",\ 
+               \n\t\"scheduler_active\": \"" + String(scheduler_active) +"\",\
                \n\t\"flow_rate\": \"" + String(flowRate) +"\",\
                \n\t\"flow_quantity\": \"" + String(totalMilliLitres) +"\",\
                \n\t\"spray_period\": \"" + String(spray_period) +"\",\
@@ -160,7 +160,8 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         notifyClients();
       }
       if (strcmp(command_item, "calibrate_ph") == 0) {
-        calibratePh(garden_command["value"]);
+        int ph = garden_command["value"];
+        calibratePh(ph);
         notifyClients();
       }
     }
@@ -191,7 +192,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         tPump.setInterval(spray_period * TASK_MILLISECOND);
         scheduler_active = 1;
         notifyClients();
-      }      
+      }
       if (strcmp(command_item, "spray_duration") == 0) {
         spray_duration = garden_command["value"];
         preferences.begin("garden", false);
@@ -266,7 +267,7 @@ String processor(const String& var){
   }
   else if(var == "FAN1_STATE"){
     return String(fan1_state);
-  }  
+  }
   else if(var == "FAN2_STATE"){
     return String(fan2_state);
   }
@@ -357,7 +358,7 @@ void disableSpray() {
 
 void setValveState() {
   digitalWrite(valve1_pin, valve1_state);
-  digitalWrite(valve2_pin, valve2_state);  
+  digitalWrite(valve2_pin, valve2_state);
 }
 
 //////////////////////////////////////////////
@@ -443,7 +444,7 @@ void IRAM_ATTR pulseCounter()
 void getFlowRate() {
   currentFlowMillis = millis();
   if (currentFlowMillis - previousFlowMillis > interval) {
-    
+
     pulse1Sec = pulseCount;
     pulseCount = 0;
 
@@ -462,7 +463,7 @@ void getFlowRate() {
 
     // Add the millilitres passed in this second to the cumulative total
     totalMilliLitres += flowMilliLitres;
-    
+
     // Print the flow rate for this second in litres / minute
     //Serial.print("Flow rate: ");
     //Serial.print(int(flowRate));  // Print the integer part of the variable
@@ -508,7 +509,7 @@ void getTempValue() {
 }
 
 // ph value
-void getPhValue(float ph_calibration_m, float ph_calibration_b) {   
+void getPhValue(float ph_calibration_m, float ph_calibration_b) {
   ph_analog = readPhAnalog(phSampleSize, ph_pin);
   float ph_voltage = analog2Voltage(ph_analog);
   ph_value = voltage2Ph(ph_voltage, ph_calibration_m, ph_calibration_b);
@@ -542,36 +543,23 @@ int readPhAnalog(int sampleSize, int pin) {
   int buf[sampleSize];
   int sumValue=0;
   int avgValue=0;
-  for(int i=0;i<sampleSize;i++) 
-  { 
-    for(int i=0;i<sampleSize;i++) 
-    { 
+  for(int i=0;i<sampleSize;i++)
+  {
+    for(int i=0;i<sampleSize;i++)
+    {
       buf[i]=analogRead(pin);
-      D_PRINT("buf[");
-      D_PRINT(i);
-      D_PRINT("] = ");
-      D_PRINTLN(buf[i]);
       delay(10);
     }
   }
 
   sortArray(buf, sampleSize);
 
-  for(int i=0;i<sampleSize;i++) 
-  { 
-    Serial.print("buf[");
-    Serial.print(i);
-    Serial.print("] = ");
-    Serial.println(buf[i]);
-  }  
   // ignore the lowest and highest 20% of the sample
   int ignore=(int((sampleSize*20)/100));
   for(int i=ignore;i<(sampleSize-ignore);i++){
     sumValue+=buf[i];
   }
   avgValue = sumValue/(sampleSize-(2*ignore));
-  D_PRINT("avgValue = ");
-  D_PRINTLN(avgValue);
 
   return avgValue;
 }
@@ -606,11 +594,10 @@ void calcCalibration(float ph1, float ph2, float phAnalog1, float phAnalog2) {
 
 
 void calibratePh(int ph_calib) {
-  while (Serial.available() <= 0) {}
   if(ph_calib == 401) {
     ph_analog_401 = readPhAnalog(phSampleSize,ph_pin);
     D_PRINT("  [calibratePh] ph_analog_401: ");
-    D_PRINTLN(ph_analog_401);  
+    D_PRINTLN(ph_analog_401);
   }
   else if(ph_calib == 686) {
     ph_analog_686 = readPhAnalog(phSampleSize,ph_pin);
@@ -779,7 +766,7 @@ void setup() {
   ledcAttachPin(fanpwm1_pin, fanChannel);
 
   // setup WiFiManager and OTA updates
-  setupWiFiManager();  
+  setupWiFiManager();
   setupOTA();
 
   // configure preferences strcture for persistent saving
@@ -827,7 +814,3 @@ void loop() {
   //setLightState();
   readSensors();
 }
-
-
-
-

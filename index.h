@@ -400,10 +400,10 @@ const char index_html[] PROGMEM = R"rawliteral(
       water_state_display = "LOW";
     }
     if (garden.ph_calibrated == true) {
-      ph_calibrated_display == "CALIBRATED";
+      ph_calibrated_display = "CALIBRATED";
     }
     else {
-      ph_calibrated_display == "UNCALIBRATED";
+      ph_calibrated_display = "UNCALIBRATED";
     }
     document.getElementById('pump1_state').innerHTML = pump1_state_display;
     document.getElementById('pump2_state').innerHTML = pump2_state_display;
@@ -425,7 +425,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('dhtValueHumidity').innerHTML = garden.dhtValueHumidity;
     document.getElementById('dallasValueTemp').innerHTML = garden.dallasValueTemp;
     document.getElementById('ph_value').innerHTML = garden.ph_value;
-    document.getElementById('ph_analog').innerHTML = garden.ph_401_analog;
+    document.getElementById('ph_analog').innerHTML = garden.ph_analog;
     document.getElementById('ph_calibrated').innerHTML = ph_calibrated_display;
     document.getElementById('ec_value').innerHTML = garden.ec_value;
     document.getElementById('water_state').innerHTML = water_state_display;
