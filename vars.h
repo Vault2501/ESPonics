@@ -2,19 +2,19 @@
 #define DHTTYPE DHT22
 
 #ifdef DEBUG
- #define D_PRINT(x)     Serial.print (x)
- #define D_PRINTDEC(x)     Serial.print (x, DEC)
- #define D_PRINTLN(x)  Serial.println (x)
+#define D_PRINT(x) Serial.print(x)
+#define D_PRINTDEC(x) Serial.print(x, DEC)
+#define D_PRINTLN(x) Serial.println(x)
 #else
- #define D_PRINT(x)
- #define D_PRINTDEC(x)
- #define D_PRINTLN(x)
+#define D_PRINT(x)
+#define D_PRINTDEC(x)
+#define D_PRINTLN(x)
 #endif
 
 
 const char* myhostname = "esponics";
 const char* ssid = APSSID;
-const char* key =  APKEY;
+const char* key = APKEY;
 
 // setting PWM properties
 const int freq = 25000;
@@ -22,26 +22,26 @@ const int fanChannel = 0;
 const int resolution = 8;
 
 // scheduler settings
-bool scheduler_active=1;
+bool scheduler_active = 1;
 unsigned long spray_period = 10000;
 unsigned long spray_duration = 1000;
 
 // pump/valve states
-int active_pump=1;
-bool pump1_state=1;
-bool pump2_state=1;
-bool valve1_state=1;
-bool valve2_state=1;
+int active_pump = 1;
+bool pump1_state = 1;
+bool pump2_state = 1;
+bool valve1_state = 1;
+bool valve2_state = 1;
 
 // fan/light states
-bool fan1_state=1;
-int fan1_speed=0;
-bool fan2_state=1;
-bool light_state=1;
-int light_on=12;
-int light_off=12;
-bool light_toggle=1;
-bool water_state=0;
+bool fan1_state = 1;
+int fan1_speed = 0;
+bool fan2_state = 1;
+bool light_state = 1;
+int light_on = 12;
+int light_off = 12;
+bool light_toggle = 1;
+bool water_state = 0;
 
 // pump module pins
 const int pump1_pin = 27;
@@ -62,8 +62,8 @@ const int rf_pin = 13;
 const int temp_pin = 33;
 const int dht_pin = 26;
 const int ec_pin = 35;
-const int ph_pin = 36; //A0, VP
-const int level_pin = 39; //A3. VN
+const int ph_pin = 36;     //A0, VP
+const int level_pin = 39;  //A3. VN
 
 // sensor vars
 float dhtValueTemp = 0;
@@ -73,12 +73,12 @@ float ph_value = 7;
 float ec_value = 0;
 
 // calibration values
-const int phSampleSize = 10;  
+const int phSampleSize = 10;
 int ph_analog_686 = -1;
 int ph_analog_401 = -1;
 int ph_analog = 0;
-float ph_calibration_b=0;
-float ph_calibration_m=1;
+float ph_calibration_b = 0;
+float ph_calibration_m = 1;
 bool ph_calibrated = false;
 
 // flow meter vars

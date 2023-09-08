@@ -31,10 +31,10 @@ void enableSpray();
 void disableSpray();
 void enableLight();
 void disableLight();
-Task tPump (spray_period * TASK_MILLISECOND, TASK_FOREVER, &enableSpray, &ts, true);
-Task tPumpOff (spray_duration * TASK_MILLISECOND, TASK_ONCE, &disableSpray, &ts, false);
-Task tLightOn (light_on * TASK_SECOND, TASK_FOREVER, &enableLight, &ts, true);
-Task tLightOff (light_off * TASK_SECOND, TASK_ONCE, &disableLight, &ts, false);
+Task tPump(spray_period *TASK_MILLISECOND, TASK_FOREVER, &enableSpray, &ts, true);
+Task tPumpOff(spray_duration *TASK_MILLISECOND, TASK_ONCE, &disableSpray, &ts, false);
+Task tLightOn(light_on *TASK_SECOND, TASK_FOREVER, &enableLight, &ts, true);
+Task tLightOff(light_off *TASK_SECOND, TASK_ONCE, &disableLight, &ts, false);
 
 
 
@@ -48,7 +48,7 @@ void setupWiFiManager() {
   wifiManager.autoConnect(APSSID, APKEY);
 }
 
-void configModeCallback (WiFiManager *myWiFiManager) {
+void configModeCallback(WiFiManager *myWiFiManager) {
   Serial.println("No WiFi found");
   Serial.print("AP:");
   Serial.println(myWiFiManager->getConfigPortalSSID());
@@ -64,37 +64,59 @@ void configModeCallback (WiFiManager *myWiFiManager) {
 
 void notifyClients() {
   ws.textAll("{\n\t\"pump1_state\": \"" + String(pump1_state) + "\",\
-               \n\t\"pump2_state\": \"" + String(pump2_state) + "\",\
-               \n\t\"valve1_state\": \"" + String(valve1_state) +"\",\
-               \n\t\"valve2_state\": \"" + String(valve2_state) +"\",\
-               \n\t\"fan1_state\": \"" + String(fan1_state) +"\",\
-               \n\t\"fan1_speed\": \"" + String(fan1_speed) +"\",\
-               \n\t\"fan2_state\": \"" + String(fan2_state) +"\",\
-               \n\t\"light_state\": \"" + String(light_state) +"\",\
-               \n\t\"light_on\": \"" + String(light_on) +"\",\
-               \n\t\"light_off\": \"" + String(light_off) +"\",\
-               \n\t\"scheduler_active\": \"" + String(scheduler_active) +"\",\
-               \n\t\"flow_rate\": \"" + String(flowRate) +"\",\
-               \n\t\"flow_quantity\": \"" + String(totalMilliLitres) +"\",\
-               \n\t\"spray_period\": \"" + String(spray_period) +"\",\
-               \n\t\"spray_duration\": \"" + String(spray_duration) +"\",\
-               \n\t\"dhtValueTemp\": \"" + String(dhtValueTemp) +"\",\
-               \n\t\"dhtValueHumidity\": \"" + String(dhtValueHumidity) +"\",\
-               \n\t\"dallasValueTemp\": \"" + String(dallasValueTemp) +"\",\
-               \n\t\"ph_value\": \"" + String(ph_value) +"\",\
-               \n\t\"ph_calibrated\": \"" + String(ph_calibrated) +"\",\
-               \n\t\"ph_analog\": \"" + String(ph_analog) +"\",\
-               \n\t\"ec_value\": \"" + String(ec_value) +"\",\
-               \n\t\"water_state\": \"" + String(water_state) +"\"\
+               \n\t\"pump2_state\": \""
+             + String(pump2_state) + "\",\
+               \n\t\"valve1_state\": \""
+             + String(valve1_state) + "\",\
+               \n\t\"valve2_state\": \""
+             + String(valve2_state) + "\",\
+               \n\t\"fan1_state\": \""
+             + String(fan1_state) + "\",\
+               \n\t\"fan1_speed\": \""
+             + String(fan1_speed) + "\",\
+               \n\t\"fan2_state\": \""
+             + String(fan2_state) + "\",\
+               \n\t\"light_state\": \""
+             + String(light_state) + "\",\
+               \n\t\"light_on\": \""
+             + String(light_on) + "\",\
+               \n\t\"light_off\": \""
+             + String(light_off) + "\",\
+               \n\t\"scheduler_active\": \""
+             + String(scheduler_active) + "\",\
+               \n\t\"flow_rate\": \""
+             + String(flowRate) + "\",\
+               \n\t\"flow_quantity\": \""
+             + String(totalMilliLitres) + "\",\
+               \n\t\"spray_period\": \""
+             + String(spray_period) + "\",\
+               \n\t\"spray_duration\": \""
+             + String(spray_duration) + "\",\
+               \n\t\"dhtValueTemp\": \""
+             + String(dhtValueTemp) + "\",\
+               \n\t\"dhtValueHumidity\": \""
+             + String(dhtValueHumidity) + "\",\
+               \n\t\"dallasValueTemp\": \""
+             + String(dallasValueTemp) + "\",\
+               \n\t\"ph_value\": \""
+             + String(ph_value) + "\",\
+               \n\t\"ph_calibrated\": \""
+             + String(ph_calibrated) + "\",\
+               \n\t\"ph_analog\": \""
+             + String(ph_analog) + "\",\
+               \n\t\"ec_value\": \""
+             + String(ec_value) + "\",\
+               \n\t\"water_state\": \""
+             + String(water_state) + "\"\
                \n}");
 }
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
-  AwsFrameInfo *info = (AwsFrameInfo*)arg;
+  AwsFrameInfo *info = (AwsFrameInfo *)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
     D_PRINTLN("Data received: ");
-    D_PRINTLN((char*)data);
+    D_PRINTLN((char *)data);
 
     DynamicJsonDocument garden_command(1024);
     DeserializationError error = deserializeJson(garden_command, data);
@@ -104,11 +126,11 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       return;
     }
 
-    const char* command_type = garden_command["type"];
+    const char *command_type = garden_command["type"];
     D_PRINT("  [handleWebSocketMessage] Command type: ");
     D_PRINTLN(command_type);
 
-    const char* command_item = garden_command["item"];
+    const char *command_item = garden_command["item"];
     D_PRINT("  [handleWebSocketMessage] Command item: ");
     D_PRINTLN(command_item);
 
@@ -207,7 +229,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         preferences.begin("garden", false);
         preferences.putULong("fan1_speed", fan1_speed);
         preferences.end();
-        setFanPwm(fanpwm1_pin,fan1_speed);
+        setFanPwm(fanpwm1_pin, fan1_speed);
         notifyClients();
       }
     }
@@ -216,19 +238,19 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
 
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
              void *arg, uint8_t *data, size_t len) {
-    switch (type) {
-      case WS_EVT_CONNECT:
-        Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-        break;
-      case WS_EVT_DISCONNECT:
-        Serial.printf("WebSocket client #%u disconnected\n", client->id());
-        break;
-      case WS_EVT_DATA:
-        handleWebSocketMessage(arg, data, len);
-        break;
-      case WS_EVT_PONG:
-      case WS_EVT_ERROR:
-        break;
+  switch (type) {
+    case WS_EVT_CONNECT:
+      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      break;
+    case WS_EVT_DISCONNECT:
+      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      break;
+    case WS_EVT_DATA:
+      handleWebSocketMessage(arg, data, len);
+      break;
+    case WS_EVT_PONG:
+    case WS_EVT_ERROR:
+      break;
   }
 }
 
@@ -237,80 +259,56 @@ void initWebSocket() {
   server.addHandler(&ws);
 }
 
-String processor(const String& var){
-  if(var == "PUMP1_STATE"){
+String processor(const String &var) {
+  if (var == "PUMP1_STATE") {
     return String(pump1_state);
-  }
-  else if(var == "PUMP2_STATE"){
+  } else if (var == "PUMP2_STATE") {
     return String(pump2_state);
-  }
-  else if(var == "VALVE1_STATE"){
+  } else if (var == "VALVE1_STATE") {
     return String(valve1_state);
-  }
-  else if(var == "VALVE2_STATE"){
+  } else if (var == "VALVE2_STATE") {
     return String(valve2_state);
-  }
-  else if(var == "SCHEDULER_ACTIVE"){
+  } else if (var == "SCHEDULER_ACTIVE") {
     return String(scheduler_active);
-  }
-  else if(var == "FLOW_RATE"){
+  } else if (var == "FLOW_RATE") {
     return String(flowRate);
-  }
-  else if(var == "FLOW_QUANTITY"){
+  } else if (var == "FLOW_QUANTITY") {
     return String(totalMilliLitres);
-  }
-  else if(var == "SPRAY_PERIOD"){
+  } else if (var == "SPRAY_PERIOD") {
     return String(spray_period);
-  }
-  else if(var == "SPRAY_DURATION"){
+  } else if (var == "SPRAY_DURATION") {
     return String(spray_duration);
-  }
-  else if(var == "FAN1_STATE"){
+  } else if (var == "FAN1_STATE") {
     return String(fan1_state);
-  }
-  else if(var == "FAN2_STATE"){
+  } else if (var == "FAN2_STATE") {
     return String(fan2_state);
-  }
-  else if(var == "FAN1_SPEED"){
+  } else if (var == "FAN1_SPEED") {
     return String(fan1_speed);
-  }
-  else if(var == "LIGHT_STATE"){
+  } else if (var == "LIGHT_STATE") {
     return String(light_state);
-  }
-  else if(var == "LIGHT_ON"){
+  } else if (var == "LIGHT_ON") {
     return String(light_on);
-  }
-  else if(var == "LIGHT_OFF"){
+  } else if (var == "LIGHT_OFF") {
     return String(light_off);
-  }
-  else if(var == "DHT_TEMP_VALUE"){
+  } else if (var == "DHT_TEMP_VALUE") {
     return String(dhtValueTemp);
-  }
-  else if(var == "DHT_HUMIDITY_VALUE"){
+  } else if (var == "DHT_HUMIDITY_VALUE") {
     return String(dhtValueHumidity);
-  }
-  else if(var == "DALLAS_TEMP_VALUE"){
+  } else if (var == "DALLAS_TEMP_VALUE") {
     return String(dallasValueTemp);
-  }
-  else if(var == "WATER_STATE"){
+  } else if (var == "WATER_STATE") {
     return String(water_state);
-  }
-  else if(var == "PH_VALUE"){
+  } else if (var == "PH_VALUE") {
     return String(ph_value);
-  }
-  else if(var == "PH_ANALOG"){
+  } else if (var == "PH_ANALOG") {
     return String(ph_analog);
-  }
-  else if(var == "PH_CALIBRATED"){
+  } else if (var == "PH_CALIBRATED") {
     return String(ph_calibrated);
-  }
-  else if(var == "EC_VALUE"){
+  } else if (var == "EC_VALUE") {
     return String(ec_value);
-  }
-  else if(var == "WATER_STATE"){
+  } else if (var == "WATER_STATE") {
     return String(water_state);
-  }
-  else {
+  } else {
     D_PRINTLN("template: Unknown variable");
     return String("  [processor] Unknown variable");
   }
@@ -364,14 +362,12 @@ void setValveState() {
 //////////////////////////////////////////////
 /// Fans
 
-void setFanState()
-{
-  digitalWrite(fan1_pin,fan1_state);
-  digitalWrite(fan2_pin,fan2_state);
+void setFanState() {
+  digitalWrite(fan1_pin, fan1_state);
+  digitalWrite(fan2_pin, fan2_state);
 }
 
-void setFanPwm(int pin, int duty)
-{
+void setFanPwm(int pin, int duty) {
   D_PRINT("  [setFanPwm] Setting PWM ");
   D_PRINT(pin);
   D_PRINT(" to ");
@@ -387,29 +383,25 @@ void setFanPwm(int pin, int duty)
 UnitecRCSwitch mySwitch;
 
 UnitecRCSwitch::ButtonCodes codes = {
- {13721648, 14595904, 13946480, 14372784}, // Button A ON codes
- {13806992, 13996448, 14506528, 13831184}, // Button A OFF codes
- {14372788, 13946484, 14595908, 13721652}, // Button B ON codes
- {13831188, 14506532, 13996452, 13806996}, // Button B OFF codes
- {14595916, 13721660, 14372796, 13946492}, // Button C ON codes
- {13996460, 13807004, 13831196, 14506540}, // Button C OFF codes
- {13806994, 13996450, 14506530, 13831186}, // Button D ON codes
- {13721650, 14595906, 13946482, 14372786}, // Button D OFF codes
+  { 13721648, 14595904, 13946480, 14372784 },  // Button A ON codes
+  { 13806992, 13996448, 14506528, 13831184 },  // Button A OFF codes
+  { 14372788, 13946484, 14595908, 13721652 },  // Button B ON codes
+  { 13831188, 14506532, 13996452, 13806996 },  // Button B OFF codes
+  { 14595916, 13721660, 14372796, 13946492 },  // Button C ON codes
+  { 13996460, 13807004, 13831196, 14506540 },  // Button C OFF codes
+  { 13806994, 13996450, 14506530, 13831186 },  // Button D ON codes
+  { 13721650, 14595906, 13946482, 14372786 },  // Button D OFF codes
 };
 
-void setLightState()
-{
-  if (light_toggle == 0)
-  {
-    if (light_state == 1)
-    {
+void setLightState() {
+  if (light_toggle == 0) {
+    if (light_state == 1) {
       // Turn light off
       D_PRINTLN("  [setLightState] Turning light off");
       mySwitch.switchOff(UnitecRCSwitch::SOCKET_A);
     }
 
-    if (light_state == 0)
-    {
+    if (light_state == 0) {
       // Turn light on
       D_PRINTLN("  [setLightState] Turning light on");
       mySwitch.switchOn(UnitecRCSwitch::SOCKET_A);
@@ -436,8 +428,7 @@ void disableLight() {
 //////////////////////////////////////////////
 /// Flow Rate
 
-void IRAM_ATTR pulseCounter()
-{
+void IRAM_ATTR pulseCounter() {
   pulseCount++;
 }
 
@@ -522,17 +513,14 @@ void getPhValue(float ph_calibration_m, float ph_calibration_b) {
   D_PRINTLN(ph_value);
 }
 
-void sortArray(int* array, int size) {
+void sortArray(int *array, int size) {
   int temp;
-  for(int i=0;i<(size-1);i++)
-  {
-    for(int j=i+1;j<size;j++)
-    {
-      if(array[i]>array[j])
-      {
-        temp=array[i];
-        array[i]=array[j];
-        array[j]=temp;
+  for (int i = 0; i < (size - 1); i++) {
+    for (int j = i + 1; j < size; j++) {
+      if (array[i] > array[j]) {
+        temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
       }
     }
   }
@@ -541,13 +529,11 @@ void sortArray(int* array, int size) {
 int readPhAnalog(int sampleSize, int pin) {
   // read sampleSize amount of values
   int buf[sampleSize];
-  int sumValue=0;
-  int avgValue=0;
-  for(int i=0;i<sampleSize;i++)
-  {
-    for(int i=0;i<sampleSize;i++)
-    {
-      buf[i]=analogRead(pin);
+  int sumValue = 0;
+  int avgValue = 0;
+  for (int i = 0; i < sampleSize; i++) {
+    for (int i = 0; i < sampleSize; i++) {
+      buf[i] = analogRead(pin);
       delay(10);
     }
   }
@@ -555,17 +541,17 @@ int readPhAnalog(int sampleSize, int pin) {
   sortArray(buf, sampleSize);
 
   // ignore the lowest and highest 20% of the sample
-  int ignore=(int((sampleSize*20)/100));
-  for(int i=ignore;i<(sampleSize-ignore);i++){
-    sumValue+=buf[i];
+  int ignore = (int((sampleSize * 20) / 100));
+  for (int i = ignore; i < (sampleSize - ignore); i++) {
+    sumValue += buf[i];
   }
-  avgValue = sumValue/(sampleSize-(2*ignore));
+  avgValue = sumValue / (sampleSize - (2 * ignore));
 
   return avgValue;
 }
 
 float analog2Voltage(float analogValue) {
-  float voltage=(float)analogValue*(3.3/4095.0);
+  float voltage = (float)analogValue * (3.3 / 4095.0);
   return voltage;
 }
 
@@ -575,10 +561,9 @@ float voltage2Ph(float voltage, float cal_m, float cal_b) {
 }
 
 bool isCalibrated() {
-  if (ph_calibration_m != 1 && ph_calibration_b != 0){
+  if (ph_calibration_m != 1 && ph_calibration_b != 0) {
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
@@ -594,17 +579,15 @@ void calcCalibration(float ph1, float ph2, float phAnalog1, float phAnalog2) {
 
 
 void calibratePh(int ph_calib) {
-  if(ph_calib == 401) {
-    ph_analog_401 = readPhAnalog(phSampleSize,ph_pin);
+  if (ph_calib == 401) {
+    ph_analog_401 = readPhAnalog(phSampleSize, ph_pin);
     D_PRINT("  [calibratePh] ph_analog_401: ");
     D_PRINTLN(ph_analog_401);
-  }
-  else if(ph_calib == 686) {
-    ph_analog_686 = readPhAnalog(phSampleSize,ph_pin);
+  } else if (ph_calib == 686) {
+    ph_analog_686 = readPhAnalog(phSampleSize, ph_pin);
     D_PRINT("  [calibratePh] ph_analog_686: ");
     D_PRINTLN(ph_analog_686);
-  }
-  else {
+  } else {
     Serial.print("Unknown ph calibration value: ");
     Serial.println(ph_calib);
   }
@@ -633,7 +616,7 @@ void getEcValue() {
 // water level
 void getWaterState() {
   bool state = digitalRead(level_pin);
-  if( state == LOW)  {
+  if (state == LOW) {
     D_PRINTLN("  [getWaterState] Water ok");
     water_state = 1;
   } else {
@@ -674,7 +657,7 @@ void setupOTA() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
       type = "sketch";
-    } else { // U_SPIFFS
+    } else {  // U_SPIFFS
       type = "filesystem";
     }
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
@@ -731,11 +714,11 @@ void setup() {
   pinMode(fan1_pin, OUTPUT);
   digitalWrite(fan1_pin, LOW);
   pinMode(fan2_pin, OUTPUT);
-  digitalWrite(fan2_pin,LOW);
+  digitalWrite(fan2_pin, LOW);
 
   // initialize rf pins
-  pinMode(rf_pin,OUTPUT);
-  digitalWrite(rf_pin,LOW);
+  pinMode(rf_pin, OUTPUT);
+  digitalWrite(rf_pin, LOW);
 
   // initialize level pin
   pinMode(level_pin, INPUT);
@@ -760,7 +743,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(flow_pin), pulseCounter, FALLING);
 
   // setup fan pwm
-  pinMode(fanpwm1_pin,OUTPUT);
+  pinMode(fanpwm1_pin, OUTPUT);
   //analogWriteFrequency(25000);
   ledcSetup(fanChannel, freq, resolution);
   ledcAttachPin(fanpwm1_pin, fanChannel);
@@ -781,19 +764,19 @@ void setup() {
   preferences.end();
 
   // check for calibration
-  ph_calibrated=isCalibrated();
+  ph_calibrated = isCalibrated();
 
   // setup Scheduler intervals for pumps
   tPump.setInterval(spray_period * TASK_MILLISECOND);
   tPumpOff.setInterval(spray_duration * TASK_MILLISECOND);
-  tLightOn.setInterval(light_on *TASK_SECOND);
-  tLightOff.setInterval(light_off *TASK_SECOND);
+  tLightOn.setInterval(light_on * TASK_SECOND);
+  tLightOff.setInterval(light_off * TASK_SECOND);
 
   // start websocket
   initWebSocket();
 
   // setup handler for web access
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send_P(200, "text/html", index_html, processor);
   });
 
