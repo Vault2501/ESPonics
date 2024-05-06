@@ -14,10 +14,6 @@
 #include "index.h"
 #include "vars.h"
 
-// WiFi AP credentials
-const char* ssid = APSSID;
-const char* key = APKEY;
-
 Preferences preferences;
 
 AsyncWebServer server(8080);
@@ -57,7 +53,7 @@ void configModeCallback(WiFiManager *myWiFiManager) {
   Serial.print("AP:");
   Serial.println(myWiFiManager->getConfigPortalSSID());
   Serial.print("Key:");
-  Serial.println(key);
+  Serial.println(APKEY);
   Serial.print("IP:");
   Serial.println(WiFi.softAPIP());
 }
