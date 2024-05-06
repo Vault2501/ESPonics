@@ -31,10 +31,12 @@ void enableSpray();
 void disableSpray();
 void enableLight();
 void disableLight();
+void openValve1();
 Task tPump(spray_period *TASK_MILLISECOND, TASK_FOREVER, &enableSpray, &ts, true);
 Task tPumpOff(spray_duration *TASK_MILLISECOND, TASK_ONCE, &disableSpray, &ts, false);
 Task tLightOn(light_on *TASK_SECOND, TASK_FOREVER, &enableLight, &ts, true);
 Task tLightOff(light_off *TASK_SECOND, TASK_ONCE, &disableLight, &ts, false);
+Task tOpenValve1(valve1_delay *TASK_MILLISECOND, TASK_ONCE, &openValve1, &ts, false);
 
 
 
@@ -332,7 +334,8 @@ void enableSpray() {
   if (active_pump == 2) {
     pump2_state = 0;
   }
-  valve1_state = 0;
+  //valve1_state = 0;
+  tOpenValve1.restartDelayed();
   notifyClients();
   tPumpOff.restartDelayed();
 };
@@ -353,6 +356,11 @@ void disableSpray() {
 
 //////////////////////////////////////////////
 /// Valves
+
+void openValve1()
+{
+  valve1_state=0;
+}
 
 void setValveState() {
   digitalWrite(valve1_pin, valve1_state);
@@ -747,6 +755,8 @@ void setup() {
   //analogWriteFrequency(25000);
   ledcSetup(fanChannel, freq, resolution);
   ledcAttachPin(fanpwm1_pin, fanChannel);
+  //ledcAttach(fanpwm1_pin, freq, resolution);
+  //ledcAttachChannel(fanpwm1_pin, freq, resolution, fanChannel);
 
   // setup WiFiManager and OTA updates
   setupWiFiManager();
@@ -758,6 +768,7 @@ void setup() {
   spray_duration = preferences.getULong("spray_duration", 1000);
   light_on = preferences.getULong("light_on", 12);
   light_off = preferences.getULong("light_off", 12);
+  valve1_delay = preferences.getULong("valve1_delay", 100);
   scheduler_active = preferences.getBool("scheduler", 0);
   ph_calibration_b = preferences.getFloat("ph_calibration_b", 1);
   ph_calibration_m = preferences.getFloat("ph_calibration_m", 1);
@@ -769,8 +780,13 @@ void setup() {
   // setup Scheduler intervals for pumps
   tPump.setInterval(spray_period * TASK_MILLISECOND);
   tPumpOff.setInterval(spray_duration * TASK_MILLISECOND);
+
+  // setup Scheduler intervals for light
   tLightOn.setInterval(light_on * TASK_SECOND);
   tLightOff.setInterval(light_off * TASK_SECOND);
+
+  // setup Scheduler intervals for valves
+  tOpenValve1.setInterval(valve1_delay * TASK_SECOND);
 
   // start websocket
   initWebSocket();
@@ -794,6 +810,8 @@ void loop() {
   setPumpState();
   setValveState();
   setFanState();
-  //setLightState();
+  setLightState();
   readSensors();
+
+  notifyClients();
 }

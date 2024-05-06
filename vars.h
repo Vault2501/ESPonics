@@ -25,6 +25,7 @@ const int resolution = 8;
 bool scheduler_active = 1;
 unsigned long spray_period = 10000;
 unsigned long spray_duration = 1000;
+unsigned long valve1_delay = 100;
 
 // pump/valve states
 int active_pump = 1;
