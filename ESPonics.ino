@@ -14,7 +14,9 @@
 #include "index.h"
 #include "vars.h"
 
-
+// WiFi AP credentials
+const char* ssid = APSSID;
+const char* key = APKEY;
 
 Preferences preferences;
 
@@ -698,6 +700,7 @@ void setupOTA() {
 /// Main part
 
 void setup() {
+
   Serial.begin(115200);
   Serial.println("Starting");
 

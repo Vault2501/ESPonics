@@ -13,8 +13,6 @@
 
 // WiFi AP credentials
 const char* myhostname = "esponics";
-const char* ssid = APSSID;
-const char* key = APKEY;
 
 // Setting PWM properties
 const int freq = 25000;
