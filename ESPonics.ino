@@ -10,9 +10,9 @@
 #include <DallasTemperature.h>
 #include <ArduinoJson.h>
 #include <Preferences.h>
-#include "wifi.h"
 #include "index.h"
 #include "vars.h"
+#include "wifimanager.h"
 
 Preferences preferences;
 
@@ -35,28 +35,6 @@ Task tPumpOff(spray_duration *TASK_MILLISECOND, TASK_ONCE, &disableSpray, &ts, f
 Task tLightOn(light_on *TASK_SECOND, TASK_FOREVER, &enableLight, &ts, true);
 Task tLightOff(light_off *TASK_SECOND, TASK_ONCE, &disableLight, &ts, false);
 Task tOpenValve1(valve1_delay *TASK_MILLISECOND, TASK_ONCE, &openValve1, &ts, false);
-
-
-
-
-//////////////////////////////////////////////
-// WiFi Manager part
-
-void setupWiFiManager() {
-  WiFiManager wifiManager;
-  wifiManager.setAPCallback(configModeCallback);
-  wifiManager.autoConnect(APSSID, APKEY);
-}
-
-void configModeCallback(WiFiManager *myWiFiManager) {
-  Serial.println("No WiFi found");
-  Serial.print("AP:");
-  Serial.println(myWiFiManager->getConfigPortalSSID());
-  Serial.print("Key:");
-  Serial.println(APKEY);
-  Serial.print("IP:");
-  Serial.println(WiFi.softAPIP());
-}
 
 
 //////////////////////////////////////////////
