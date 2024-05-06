@@ -308,8 +308,6 @@ String processor(const String &var) {
     return String(ph_calibrated);
   } else if (var == "EC_VALUE") {
     return String(ec_value);
-  } else if (var == "WATER_STATE") {
-    return String(water_state);
   } else {
     D_PRINTLN("template: Unknown variable");
     return String("  [processor] Unknown variable");
