@@ -50,7 +50,7 @@ void notifyClients() {
                \n\t\"fan1_state\": \""
              + String(state.fan1) + "\",\
                \n\t\"fan1_speed\": \""
-             + String(fan1_speed) + "\",\
+             + String(settings.fan1_speed) + "\",\
                \n\t\"fan2_state\": \""
              + String(state.fan2) + "\",\
                \n\t\"light_state\": \""
@@ -60,7 +60,7 @@ void notifyClients() {
                \n\t\"light_off\": \""
              + String(schedule.light_off) + "\",\
                \n\t\"scheduler_active\": \""
-             + String(scheduler_active) + "\",\
+             + String(settings.scheduler_active) + "\",\
                \n\t\"flow_rate\": \""
              + String(flowRate) + "\",\
                \n\t\"flow_quantity\": \""
@@ -118,28 +118,28 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     if (strcmp(command_type, "toggle") == 0) {
       if (strcmp(command_item, "pump1") == 0) {
         state.pump1 = !state.pump1;
-        scheduler_active = 0;
+        settings.scheduler_active = 0;
         notifyClients();
       }
       if (strcmp(command_item, "pump2") == 0) {
         state.pump2 = !state.pump2;
-        scheduler_active = 0;
+        settings.scheduler_active = 0;
         notifyClients();
       }
       if (strcmp(command_item, "valve1") == 0) {
         state.valve1 = !state.valve1;
-        scheduler_active = 0;
+        settings.scheduler_active = 0;
         notifyClients();
       }
       if (strcmp(command_item, "valve2") == 0) {
         state.valve2 = !state.valve2;
-        scheduler_active = 0;
+        settings.scheduler_active = 0;
         notifyClients();
       }
       if (strcmp(command_item, "scheduler") == 0) {
-        scheduler_active = !scheduler_active;
+        settings.scheduler_active = !settings.scheduler_active;
         preferences.begin("garden", false);
-        preferences.putBool("scheduler", scheduler_active);
+        preferences.putBool("scheduler", settings.scheduler_active);
         preferences.end();
         notifyClients();
       }
@@ -155,7 +155,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         D_PRINTLN("  [handleWebSocketMessage] light toggle command");
         light_toggle = 0;
         state.light = !state.light;
-        scheduler_active = 0;
+        settings.scheduler_active = 0;
         notifyClients();
       }
       if (strcmp(command_item, "calibrate_ph") == 0) {
@@ -171,7 +171,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         preferences.putULong("light_on", schedule.light_on);
         preferences.end();
         tLightOn.setInterval(schedule.light_on * TASK_SECOND);
-        scheduler_active = 1;
+        settings.scheduler_active = 1;
         notifyClients();
       }
       if (strcmp(command_item, "light_off") == 0) {
@@ -180,7 +180,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         preferences.putULong("light_off", schedule.light_off);
         preferences.end();
         tLightOn.setInterval(schedule.light_off * TASK_SECOND);
-        scheduler_active = 1;
+        settings.scheduler_active = 1;
         notifyClients();
       }
       if (strcmp(command_item, "spray_period") == 0) {
@@ -189,7 +189,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         preferences.putULong("spray_period", schedule.spray_period);
         preferences.end();
         tPump.setInterval(schedule.spray_period * TASK_MILLISECOND);
-        scheduler_active = 1;
+        settings.scheduler_active = 1;
         notifyClients();
       }
       if (strcmp(command_item, "spray_duration") == 0) {
@@ -198,15 +198,15 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         preferences.putULong("spray_duration", schedule.spray_duration);
         preferences.end();
         tPumpOff.setInterval(schedule.spray_duration * TASK_MILLISECOND);
-        scheduler_active = 1;
+        settings.scheduler_active = 1;
         notifyClients();
       }
       if (strcmp(command_item, "fan1_speed") == 0) {
-        fan1_speed = garden_command["value"];
+        settings.fan1_speed = garden_command["value"];
         preferences.begin("garden", false);
-        preferences.putULong("fan1_speed", fan1_speed);
+        preferences.putULong("fan1_speed", settings.fan1_speed);
         preferences.end();
-        setFanPwm(FANPWM1_PIN, fan1_speed);
+        setFanPwm(FANPWM1_PIN, settings.fan1_speed);
         notifyClients();
       }
     }
@@ -246,7 +246,7 @@ String processor(const String &var) {
   } else if (var == "VALVE2_STATE") {
     return String(state.valve2);
   } else if (var == "SCHEDULER_ACTIVE") {
-    return String(scheduler_active);
+    return String(settings.scheduler_active);
   } else if (var == "FLOW_RATE") {
     return String(flowRate);
   } else if (var == "FLOW_QUANTITY") {
@@ -260,7 +260,7 @@ String processor(const String &var) {
   } else if (var == "FAN2_STATE") {
     return String(state.fan2);
   } else if (var == "FAN1_SPEED") {
-    return String(fan1_speed);
+    return String(settings.fan1_speed);
   } else if (var == "LIGHT_STATE") {
     return String(state.light);
   } else if (var == "LIGHT_ON") {
@@ -305,11 +305,11 @@ void setPumpState() {
 
 void enableSpray() {
   D_PRINT("  [enableSpray] Enabling spray ");
-  D_PRINTLN(active_pump);
-  if (active_pump == 1) {
+  D_PRINTLN(settings.active_pump);
+  if (settings.active_pump == 1) {
     state.pump1 = 0;
   }
-  if (active_pump == 2) {
+  if (settings.active_pump == 2) {
     state.pump2 = 0;
   }
   //state.valve1 = 0;
@@ -320,11 +320,11 @@ void enableSpray() {
 
 void disableSpray() {
   D_PRINT("  [disableSpray] Disabling Spray ");
-  D_PRINTLN(active_pump);
-  if (active_pump == 1) {
+  D_PRINTLN(settings.active_pump);
+  if (settings.active_pump == 1) {
     state.pump1 = 1;
   }
-  if (active_pump == 2) {
+  if (settings.active_pump == 2) {
     state.pump2 = 1;
   }
   state.valve1 = 1;
@@ -360,7 +360,7 @@ void setFanPwm(int pin, int duty) {
   D_PRINT(duty);
   int dutyCycle = (duty * 255) / 100;
   D_PRINTLN(dutyCycle);
-  ledcWrite(fanChannel, dutyCycle);
+  ledcWrite(PWM_FANCHANNEL, dutyCycle);
   //analogWrite(pin, (duty / 100) * 1023);
 }
 //////////////////////////////////////////////
@@ -685,22 +685,22 @@ void setup() {
   // setup fan pwm
   pinMode(FANPWM1_PIN, OUTPUT);
   //analogWriteFrequency(25000);
-  ledcSetup(fanChannel, freq, resolution);
-  ledcAttachPin(FANPWM1_PIN, fanChannel);
-  //ledcAttach(FANPWM1_PIN, freq, resolution);
-  //ledcAttachChannel(FANPWM1_PIN, freq, resolution, fanChannel);
+  ledcSetup(PWM_FANCHANNEL, PWM_FREQ, PWM_RESOLUTION);
+  ledcAttachPin(FANPWM1_PIN, PWM_FANCHANNEL);
+  //ledcAttach(FANPWM1_PIN, PWM_FREQ, PWM_RESOLUTION);
+  //ledcAttachChannel(FANPWM1_PIN, PWM_FREQ, PWM_RESOLUTION, PWM_FANCHANNEL);
 
   // setup WiFiManager
   setupWiFiManager();
 
   // configure preferences structure for persistent saving
   preferences.begin("garden", true);
-  schedule.spray_period = preferences.getULong("spray_period", 10000);
-  schedule.spray_duration = preferences.getULong("spray_duration", 1000);
-  schedule.light_on = preferences.getULong("light_on", 12);
-  schedule.light_off = preferences.getULong("light_off", 12);
-  schedule.valve1_delay = preferences.getULong("valve1_delay", 100);
-  scheduler_active = preferences.getBool("scheduler", 0);
+  schedule.spray_period = preferences.getULong("spray_period", SPRAY_PERIOD);
+  schedule.spray_duration = preferences.getULong("spray_duration", SPRAY_DURATION);
+  schedule.light_on = preferences.getULong("light_on", LIGHT_ON);
+  schedule.light_off = preferences.getULong("light_off", LIGHT_OFF);
+  schedule.valve1_delay = preferences.getULong("valve1_delay", VALVE1_DELAY);
+  settings.scheduler_active = preferences.getBool("scheduler", 0);
   ph_calibration_b = preferences.getFloat("ph_calibration_b", 1);
   ph_calibration_m = preferences.getFloat("ph_calibration_m", 1);
   preferences.end();
@@ -733,7 +733,7 @@ void setup() {
 
 void loop() {
   ws.cleanupClients();
-  if (scheduler_active == 1) {
+  if (settings.scheduler_active == 1) {
     ts.execute();
   }
 

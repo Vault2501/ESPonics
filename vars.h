@@ -13,6 +13,12 @@
 #define D_PRINTLN(x)
 #endif
 
+struct esp_settings {
+  bool scheduler_active;
+  int active_pump;
+  int fan1_speed;
+};
+
 struct esp_state {
   bool pump1;
   bool pump2;
@@ -40,6 +46,10 @@ struct esp_sensors {
   float ec_value;
 };
 
+esp_settings settings={SCHEDULER_ACTIVE,
+                       ACTIVE_PUMP,
+                       FAN1_SPEED};
+
 esp_state state={0,
                  0,
                  0,
@@ -62,22 +72,8 @@ esp_sensors sensors = {0,
                        0};
 
 
-// WiFi AP credentials
+// Hostname
 const char* myhostname = "esponics";
-
-// Setting PWM properties
-const int freq = 25000;
-const int fanChannel = 0;
-const int resolution = 8;
-
-// Scheduler active (1=off, 0=on)
-bool scheduler_active = 1;
-
-// Active pump (1/2)
-int active_pump = 1;
-
-// pwm fan speed (0-100)
-int fan1_speed = 0;
 
 // Toggle light (0=yes,1=no)
 bool light_toggle = 1;

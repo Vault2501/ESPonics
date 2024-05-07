@@ -19,6 +19,11 @@
 #define PH_PIN 36     //A0, VP
 #define LEVEL_PIN 39  //A3. VN
 
+// Default PWM properties
+#define PWM_FREQ 25000
+#define PWM_FANCHANNEL 0
+#define PWM_RESOLUTION 8
+
 // Spray schedule defaults (milliseconds)
 #define SPRAY_PERIOD 10000
 #define SPRAY_DURATION 1000
@@ -26,5 +31,14 @@
 // Light schedule defaults (hours)
 #define LIGHT_ON 12
 #define LIGHT_OFF 12
+
+// Default active pump (1/2)
+#define ACTIVE_PUMP 1
+// Default scheduler active
+#define SCHEDULER_ACTIVE 1
+// Default pwm fan speed (0-100)
+#define FAN1_SPEED 0
+
+
 
 #endif
