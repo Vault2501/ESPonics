@@ -18,9 +18,9 @@ Preferences preferences;
 AsyncWebServer server(8080);
 AsyncWebSocket ws("/ws");
 
-DHT dht(dht_pin, DHTTYPE);
+DHT dht(DHT_PIN, DHTTYPE);
 
-OneWire oneWire(temp_pin);
+OneWire oneWire(TEMP_PIN);
 DallasTemperature temp_sensor(&oneWire);
 
 Scheduler ts;
@@ -206,7 +206,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         preferences.begin("garden", false);
         preferences.putULong("fan1_speed", fan1_speed);
         preferences.end();
-        setFanPwm(fanpwm1_pin, fan1_speed);
+        setFanPwm(FANPWM1_PIN, fan1_speed);
         notifyClients();
       }
     }
@@ -293,9 +293,14 @@ String processor(const String &var) {
 //////////////////////////////////////////////
 /// Pumps
 
+void setPumpState_(esp_state& state) {
+  digitalWrite(PUMP1_PIN, state.pump1);
+  digitalWrite(PUMP2_PIN, state.pump2);
+}
+
 void setPumpState() {
-  digitalWrite(pump1_pin, pump1_state);
-  digitalWrite(pump2_pin, pump2_state);
+  digitalWrite(PUMP1_PIN, pump1_state);
+  digitalWrite(PUMP2_PIN, pump2_state);
 }
 
 void enableSpray() {
@@ -336,16 +341,16 @@ void openValve1()
 }
 
 void setValveState() {
-  digitalWrite(valve1_pin, valve1_state);
-  digitalWrite(valve2_pin, valve2_state);
+  digitalWrite(VALVE1_PIN, valve1_state);
+  digitalWrite(VALVE2_PIN, valve2_state);
 }
 
 //////////////////////////////////////////////
 /// Fans
 
 void setFanState() {
-  digitalWrite(fan1_pin, fan1_state);
-  digitalWrite(fan2_pin, fan2_state);
+  digitalWrite(FAN1_PIN, fan1_state);
+  digitalWrite(FAN2_PIN, fan2_state);
 }
 
 void setFanPwm(int pin, int duty) {
@@ -482,7 +487,7 @@ void getTempValue() {
 
 // ph value
 void getPhValue(float ph_calibration_m, float ph_calibration_b) {
-  ph_analog = readPhAnalog(phSampleSize, ph_pin);
+  ph_analog = readPhAnalog(phSampleSize, PH_PIN);
   float ph_voltage = analog2Voltage(ph_analog);
   ph_value = voltage2Ph(ph_voltage, ph_calibration_m, ph_calibration_b);
 
@@ -561,11 +566,11 @@ void calcCalibration(float ph1, float ph2, float phAnalog1, float phAnalog2) {
 
 void calibratePh(int ph_calib) {
   if (ph_calib == 401) {
-    ph_analog_401 = readPhAnalog(phSampleSize, ph_pin);
+    ph_analog_401 = readPhAnalog(phSampleSize, PH_PIN);
     D_PRINT("  [calibratePh] ph_analog_401: ");
     D_PRINTLN(ph_analog_401);
   } else if (ph_calib == 686) {
-    ph_analog_686 = readPhAnalog(phSampleSize, ph_pin);
+    ph_analog_686 = readPhAnalog(phSampleSize, PH_PIN);
     D_PRINT("  [calibratePh] ph_analog_686: ");
     D_PRINTLN(ph_analog_686);
   } else {
@@ -596,7 +601,7 @@ void getEcValue() {
 
 // water level
 void getWaterState() {
-  bool state = digitalRead(level_pin);
+  bool state = digitalRead(LEVEL_PIN);
   if (state == LOW) {
     D_PRINTLN("  [getWaterState] Water ok");
     water_state = 1;
@@ -631,39 +636,39 @@ void setup() {
   Serial.println("Starting");
 
   // initialize pump pins
-  pinMode(pump1_pin, OUTPUT);
-  digitalWrite(pump1_pin, LOW);
-  pinMode(pump2_pin, OUTPUT);
-  digitalWrite(pump2_pin, LOW);
+  pinMode(PUMP1_PIN, OUTPUT);
+  digitalWrite(PUMP1_PIN, LOW);
+  pinMode(PUMP2_PIN, OUTPUT);
+  digitalWrite(PUMP2_PIN, LOW);
 
   // initialize valve pins
-  pinMode(valve1_pin, OUTPUT);
-  digitalWrite(valve1_pin, LOW);
-  pinMode(valve2_pin, OUTPUT);
-  digitalWrite(valve2_pin, LOW);
+  pinMode(VALVE1_PIN, OUTPUT);
+  digitalWrite(VALVE1_PIN, LOW);
+  pinMode(VALVE2_PIN, OUTPUT);
+  digitalWrite(VALVE2_PIN, LOW);
 
   // initialize flow pin
-  pinMode(flow_pin, INPUT_PULLUP);
+  pinMode(FLOW_PIN, INPUT_PULLUP);
 
   // initialize fan pins
-  pinMode(fan1_pin, OUTPUT);
-  digitalWrite(fan1_pin, LOW);
-  pinMode(fan2_pin, OUTPUT);
-  digitalWrite(fan2_pin, LOW);
+  pinMode(FAN1_PIN, OUTPUT);
+  digitalWrite(FAN1_PIN, LOW);
+  pinMode(FAN2_PIN, OUTPUT);
+  digitalWrite(FAN2_PIN, LOW);
 
   // initialize rf pins
-  pinMode(rf_pin, OUTPUT);
-  digitalWrite(rf_pin, LOW);
+  pinMode(RF_PIN, OUTPUT);
+  digitalWrite(RF_PIN, LOW);
 
   // initialize level pin
-  pinMode(level_pin, INPUT);
+  pinMode(LEVEL_PIN, INPUT);
 
   // button setup for rf switch
   mySwitch.setBtnCodes(&codes);
-  mySwitch.enableTransmit(rf_pin);
+  mySwitch.enableTransmit(RF_PIN);
 
   // initialize dht
-  pinMode(dht_pin, INPUT);
+  pinMode(DHT_PIN, INPUT);
   dht.begin();
 
   // initialize 18B20 temperature sensor
@@ -675,15 +680,15 @@ void setup() {
   flowMilliLitres = 0;
   totalMilliLitres = 0;
   //previousMillis = 0;
-  attachInterrupt(digitalPinToInterrupt(flow_pin), pulseCounter, FALLING);
+  attachInterrupt(digitalPinToInterrupt(FLOW_PIN), pulseCounter, FALLING);
 
   // setup fan pwm
-  pinMode(fanpwm1_pin, OUTPUT);
+  pinMode(FANPWM1_PIN, OUTPUT);
   //analogWriteFrequency(25000);
   ledcSetup(fanChannel, freq, resolution);
-  ledcAttachPin(fanpwm1_pin, fanChannel);
-  //ledcAttach(fanpwm1_pin, freq, resolution);
-  //ledcAttachChannel(fanpwm1_pin, freq, resolution, fanChannel);
+  ledcAttachPin(FANPWM1_PIN, fanChannel);
+  //ledcAttach(FANPWM1_PIN, freq, resolution);
+  //ledcAttachChannel(FANPWM1_PIN, freq, resolution, fanChannel);
 
   // setup WiFiManager
   setupWiFiManager();

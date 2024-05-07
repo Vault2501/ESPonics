@@ -1,3 +1,5 @@
+#include "config.h"
+
 #define DEBUG
 #define DHTTYPE DHT22
 
@@ -11,6 +13,85 @@
 #define D_PRINTLN(x)
 #endif
 
+struct esp_state {
+  bool pump1;
+  bool pump2;
+  bool valve1;
+  bool valve2;
+  bool fan1;
+  bool fan2;
+  bool light;
+  bool water;
+};
+
+struct esp_schedule {
+  unsigned long spray_period;
+  unsigned long spray_duration;
+  unsigned long valve1_delay;
+  int light_on;
+  int light_off;
+};
+
+struct esp_sensors {
+  float dhtValueTemp;
+  float dhtValueHumidity;
+  float dallasValueTemp;
+  float ph_value;
+  float ec_value;
+};
+
+
+// Pump/valve states (1 = off)
+bool pump1_state = 1;
+bool pump2_state = 1;
+bool valve1_state = 1;
+bool valve2_state = 1;
+// Fan/light states (1 = off)
+bool fan1_state = 1;
+bool fan2_state = 1;
+bool light_state = 1;
+// Water level (0=low,1=ok)
+bool water_state = 0;
+
+esp_state state={pump1_state,
+                 pump2_state,
+                 valve1_state,
+                 valve2_state,
+                 fan1_state,
+                 fan2_state,
+                 light_state,
+                 water_state};
+
+
+// Spray schedule settings (milliseconds)
+unsigned long spray_period = 10000;
+unsigned long spray_duration = 1000;
+unsigned long valve1_delay = 100;
+// Light schedule defaults (hours)
+int light_on = 12;
+int light_off = 12;
+
+esp_schedule schedule{spray_period,
+                      spray_duration,
+                      valve1_delay,
+                      light_on,
+                      light_off};
+
+
+// Sensor vars
+float dhtValueTemp = 0;
+float dhtValueHumidity = 0;
+float dallasValueTemp = 0;
+float ph_value = 7;
+float ec_value = 0;
+
+esp_sensors sensors = {dhtValueTemp,
+                       dhtValueHumidity,
+                       dallasValueTemp,
+                       ph_value,
+                       ec_value};
+
+
 // WiFi AP credentials
 const char* myhostname = "esponics";
 
@@ -19,63 +100,17 @@ const int freq = 25000;
 const int fanChannel = 0;
 const int resolution = 8;
 
-// Scheduler settings (milliseconds)
+// Scheduler active (1=off, 0=on)
 bool scheduler_active = 1;
-unsigned long spray_period = 10000;
-unsigned long spray_duration = 1000;
-unsigned long valve1_delay = 100;
 
 // Active pump (1/2)
 int active_pump = 1;
-// Pump/valve states (1 = off)
-bool pump1_state = 1;
-bool pump2_state = 1;
-bool valve1_state = 1;
-bool valve2_state = 1;
 
-// Fan/light states (1 = off)
-bool fan1_state = 1;
-bool fan2_state = 1;
-bool light_state = 1;
 // pwm fan speed (0-100)
 int fan1_speed = 0;
 
-// Light schedule defaults (hours)
-int light_on = 12;
-int light_off = 12;
-
 // Toggle light (0=yes,1=no)
 bool light_toggle = 1;
-
-// Water level (0=low,1=ok)
-bool water_state = 0;
-
-// Pump module pins
-const int pump1_pin = 27;
-const int pump2_pin = 14;
-const int valve1_pin = 12;
-const int valve2_pin = 15;
-const int flow_pin = 32;
-
-// Fan/light module pins
-const int fan1_pin = 16;
-const int fan2_pin = 17;
-const int fanpwm1_pin = 25;
-const int rf_pin = 13;
-
-// Sensor box pins
-const int temp_pin = 33;
-const int dht_pin = 26;
-const int ec_pin = 35;
-const int ph_pin = 36;     //A0, VP
-const int level_pin = 39;  //A3. VN
-
-// Sensor vars
-float dhtValueTemp = 0;
-float dhtValueHumidity = 0;
-float dallasValueTemp = 0;
-float ph_value = 7;
-float ec_value = 0;
 
 // Calibration values
 const int phSampleSize = 10;
