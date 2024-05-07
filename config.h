@@ -11,8 +11,9 @@
 #define FAN1_PIN 16
 #define FAN2_PIN 17
 #define FANPWM1_PIN 25
+// Light rf switch pin
 #define RF_PIN 13
-// Sensor box pins
+// Sensor pins
 #define TEMP_PIN 33
 #define DHT_PIN 26
 #define EC_PIN 35
@@ -23,6 +24,9 @@
 #define PWM_FREQ 25000
 #define PWM_FANCHANNEL 0
 #define PWM_RESOLUTION 8
+
+// Sensor read interval in ms
+#define SENSOR_INTERVAL 1000
 
 // Spray schedule defaults (milliseconds)
 #define SPRAY_PERIOD 10000
@@ -35,7 +39,7 @@
 // Default active pump (1/2)
 #define ACTIVE_PUMP 1
 // Default scheduler active
-#define SCHEDULER_ACTIVE 1
+#define SCHEDULER_ACTIVE 0
 // Default pwm fan speed (0-100)
 #define FAN1_SPEED 0
 // Calibration defaults

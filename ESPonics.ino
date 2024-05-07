@@ -11,6 +11,7 @@
 #include <Preferences.h>
 #include "index.h"
 #include "vars.h"
+#include "setup.h"
 #include "wifimanager.h"
 
 Preferences preferences;
@@ -420,7 +421,7 @@ void IRAM_ATTR pulseCounter() {
 
 void getFlowRate() {
   currentFlowMillis = millis();
-  if (currentFlowMillis - previousFlowMillis > interval) {
+  if (currentFlowMillis - previousFlowMillis > sensors.interval) {
 
     pulse1Sec = pulseCount;
     pulseCount = 0;
@@ -613,7 +614,7 @@ void getWaterState() {
 
 void readSensors() {
   currentMillis = millis();
-  if (currentMillis - previousMillis > interval) {
+  if (currentMillis - previousMillis > sensors.interval) {
     D_PRINTLN("  [readSensors] Reading Sensors");
     getWaterState();
     getTempValue();
@@ -635,40 +636,14 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Starting");
 
-  // initialize pump pins
-  pinMode(PUMP1_PIN, OUTPUT);
-  digitalWrite(PUMP1_PIN, LOW);
-  pinMode(PUMP2_PIN, OUTPUT);
-  digitalWrite(PUMP2_PIN, LOW);
-
-  // initialize valve pins
-  pinMode(VALVE1_PIN, OUTPUT);
-  digitalWrite(VALVE1_PIN, LOW);
-  pinMode(VALVE2_PIN, OUTPUT);
-  digitalWrite(VALVE2_PIN, LOW);
-
-  // initialize flow pin
-  pinMode(FLOW_PIN, INPUT_PULLUP);
-
-  // initialize fan pins
-  pinMode(FAN1_PIN, OUTPUT);
-  digitalWrite(FAN1_PIN, LOW);
-  pinMode(FAN2_PIN, OUTPUT);
-  digitalWrite(FAN2_PIN, LOW);
-
-  // initialize rf pins
-  pinMode(RF_PIN, OUTPUT);
-  digitalWrite(RF_PIN, LOW);
-
-  // initialize level pin
-  pinMode(LEVEL_PIN, INPUT);
+  setupPins();
 
   // button setup for rf switch
   mySwitch.setBtnCodes(&codes);
   mySwitch.enableTransmit(RF_PIN);
 
-  // initialize dht
-  pinMode(DHT_PIN, INPUT);
+  // // initialize dht
+  //pinMode(DHT_PIN, INPUT);
   dht.begin();
 
   // initialize 18B20 temperature sensor
@@ -700,9 +675,9 @@ void setup() {
   schedule.light_on = preferences.getULong("light_on", LIGHT_ON);
   schedule.light_off = preferences.getULong("light_off", LIGHT_OFF);
   schedule.valve1_delay = preferences.getULong("valve1_delay", VALVE1_DELAY);
-  settings.scheduler_active = preferences.getBool("scheduler", 0);
-  settings.ph_calibration_b = preferences.getFloat("ph_calibration_b", 1);
-  settings.ph_calibration_m = preferences.getFloat("ph_calibration_m", 1);
+  settings.scheduler_active = preferences.getBool("scheduler", SCHEDULER_ACTIVE);
+  settings.ph_calibration_b = preferences.getFloat("ph_calibration_b", PH_CALIBRATION_B);
+  settings.ph_calibration_m = preferences.getFloat("ph_calibration_m", PH_CALIBRATION_M);
   preferences.end();
 
   // check for calibration

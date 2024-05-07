@@ -47,6 +47,7 @@ struct esp_sensors {
   float dallasValueTemp;
   float ph_value;
   float ec_value;
+  int interval;
 };
 
 esp_settings settings={SCHEDULER_ACTIVE,
@@ -56,12 +57,12 @@ esp_settings settings={SCHEDULER_ACTIVE,
                        PH_CALIBRATION_B,
                        PH_CALIBRATION_M};
 
-esp_state state={0,
-                 0,
-                 0,
-                 0,
-                 0,
-                 0,
+esp_state state={1,
+                 1,
+                 1,
+                 1,
+                 1,
+                 1,
                  1,
                  0};
 
@@ -75,11 +76,12 @@ esp_sensors sensors = {0,
                        0,
                        0,
                        7,
-                       0};
+                       0,
+                       SENSOR_INTERVAL};
 
 
 // Hostname
-const char* myhostname = "esponics";
+//const char* hostname = HOSTNAME;
 
 // Toggle light (0=yes,1=no)
 bool light_toggle = 1;
@@ -91,7 +93,7 @@ int ph_analog_401 = -1;
 int ph_analog = 0;
 
 // Flow meter vars
-int interval = 1000;
+//int interval = 1000;
 float calibrationFactor = 4.5;
 volatile byte pulseCount;
 byte pulse1Sec = 0;
