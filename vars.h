@@ -17,6 +17,9 @@ struct esp_settings {
   bool scheduler_active;
   int active_pump;
   int fan1_speed;
+  bool ph_calibrated;
+  float ph_calibration_b;
+  float ph_calibration_m;
 };
 
 struct esp_state {
@@ -48,7 +51,10 @@ struct esp_sensors {
 
 esp_settings settings={SCHEDULER_ACTIVE,
                        ACTIVE_PUMP,
-                       FAN1_SPEED};
+                       FAN1_SPEED,
+                       PH_CALIBRATED,
+                       PH_CALIBRATION_B,
+                       PH_CALIBRATION_M};
 
 esp_state state={0,
                  0,
@@ -83,9 +89,6 @@ const int phSampleSize = 10;
 int ph_analog_686 = -1;
 int ph_analog_401 = -1;
 int ph_analog = 0;
-float ph_calibration_b = 0;
-float ph_calibration_m = 1;
-bool ph_calibrated = false;
 
 // Flow meter vars
 int interval = 1000;

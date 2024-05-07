@@ -78,7 +78,7 @@ void notifyClients() {
                \n\t\"ph_value\": \""
              + String(sensors.ph_value) + "\",\
                \n\t\"ph_calibrated\": \""
-             + String(ph_calibrated) + "\",\
+             + String(settings.ph_calibrated) + "\",\
                \n\t\"ph_analog\": \""
              + String(ph_analog) + "\",\
                \n\t\"ec_value\": \""
@@ -280,7 +280,7 @@ String processor(const String &var) {
   } else if (var == "PH_ANALOG") {
     return String(ph_analog);
   } else if (var == "PH_CALIBRATED") {
-    return String(ph_calibrated);
+    return String(settings.ph_calibrated);
   } else if (var == "EC_VALUE") {
     return String(sensors.ec_value);
   } else {
@@ -547,7 +547,7 @@ float voltage2Ph(float voltage, float cal_m, float cal_b) {
 }
 
 bool isCalibrated() {
-  if (ph_calibration_m != 1 && ph_calibration_b != 0) {
+  if (settings.ph_calibration_m != 1 && settings.ph_calibration_b != 0) {
     return true;
   } else {
     return false;
@@ -555,12 +555,12 @@ bool isCalibrated() {
 }
 
 void calcCalibration(float ph1, float ph2, float phAnalog1, float phAnalog2) {
-  ph_calibration_m = (ph2 - ph1) / (phAnalog2 - phAnalog1);
-  ph_calibration_b = ph1 - (ph_calibration_m * phAnalog1);
-  D_PRINT("  [calcCalibration] ph_calibration_b: ");
-  D_PRINTLN(ph_calibration_b);
-  D_PRINT("  [calcCalibration] ph_calibration_m: ");
-  D_PRINTLN(ph_calibration_m);
+  settings.ph_calibration_m = (ph2 - ph1) / (phAnalog2 - phAnalog1);
+  settings.ph_calibration_b = ph1 - (settings.ph_calibration_m * phAnalog1);
+  D_PRINT("  [calcCalibration] settings.ph_calibration_b: ");
+  D_PRINTLN(settings.ph_calibration_b);
+  D_PRINT("  [calcCalibration] settings.ph_calibration_m: ");
+  D_PRINTLN(settings.ph_calibration_m);
 }
 
 
@@ -580,8 +580,8 @@ void calibratePh(int ph_calib) {
   if (ph_analog_401 != -1 && ph_analog_686 != -1) {
     calcCalibration(4.01, 6.86, ph_analog_401, ph_analog_686);
     preferences.begin("garden", false);
-    preferences.putULong("ph_calibration_b", ph_calibration_b);
-    preferences.putULong("ph_calibration_m", ph_calibration_m);
+    preferences.putULong("ph_calibration_b", settings.ph_calibration_b);
+    preferences.putULong("ph_calibration_m", settings.ph_calibration_m);
     preferences.end();
     ph_analog_401 = -1;
     ph_analog_686 = -1;
@@ -619,7 +619,7 @@ void readSensors() {
     getTempValue();
     getDhtValue();
     //getEcValue;
-    getPhValue(ph_calibration_m, ph_calibration_b);
+    getPhValue(settings.ph_calibration_m, settings.ph_calibration_b);
 
     notifyClients();
     previousMillis = millis();
@@ -701,12 +701,12 @@ void setup() {
   schedule.light_off = preferences.getULong("light_off", LIGHT_OFF);
   schedule.valve1_delay = preferences.getULong("valve1_delay", VALVE1_DELAY);
   settings.scheduler_active = preferences.getBool("scheduler", 0);
-  ph_calibration_b = preferences.getFloat("ph_calibration_b", 1);
-  ph_calibration_m = preferences.getFloat("ph_calibration_m", 1);
+  settings.ph_calibration_b = preferences.getFloat("ph_calibration_b", 1);
+  settings.ph_calibration_m = preferences.getFloat("ph_calibration_m", 1);
   preferences.end();
 
   // check for calibration
-  ph_calibrated = isCalibrated();
+  settings.ph_calibrated = isCalibrated();
 
   // setup Scheduler intervals for pumps
   tPump.setInterval(schedule.spray_period * TASK_MILLISECOND);

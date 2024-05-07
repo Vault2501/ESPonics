@@ -38,7 +38,10 @@
 #define SCHEDULER_ACTIVE 1
 // Default pwm fan speed (0-100)
 #define FAN1_SPEED 0
-
+// Calibration defaults
+#define PH_CALIBRATED false
+#define PH_CALIBRATION_B 0
+#define PH_CALIBRATION_M 1
 
 
 #endif
