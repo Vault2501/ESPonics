@@ -29,36 +29,36 @@ void disableSpray();
 void enableLight();
 void disableLight();
 void openValve1();
-Task tPump(spray_period *TASK_MILLISECOND, TASK_FOREVER, &enableSpray, &ts, true);
-Task tPumpOff(spray_duration *TASK_MILLISECOND, TASK_ONCE, &disableSpray, &ts, false);
-Task tLightOn(light_on *TASK_SECOND, TASK_FOREVER, &enableLight, &ts, true);
-Task tLightOff(light_off *TASK_SECOND, TASK_ONCE, &disableLight, &ts, false);
-Task tOpenValve1(valve1_delay *TASK_MILLISECOND, TASK_ONCE, &openValve1, &ts, false);
+Task tPump(schedule.spray_period *TASK_MILLISECOND, TASK_FOREVER, &enableSpray, &ts, true);
+Task tPumpOff(schedule.spray_duration *TASK_MILLISECOND, TASK_ONCE, &disableSpray, &ts, false);
+Task tLightOn(schedule.light_on *TASK_SECOND, TASK_FOREVER, &enableLight, &ts, true);
+Task tLightOff(schedule.light_off *TASK_SECOND, TASK_ONCE, &disableLight, &ts, false);
+Task tOpenValve1(schedule.valve1_delay *TASK_MILLISECOND, TASK_ONCE, &openValve1, &ts, false);
 
 
 //////////////////////////////////////////////
 // Web part
 
 void notifyClients() {
-  ws.textAll("{\n\t\"pump1_state\": \"" + String(pump1_state) + "\",\
+  ws.textAll("{\n\t\"pump1_state\": \"" + String(state.pump1) + "\",\
                \n\t\"pump2_state\": \""
-             + String(pump2_state) + "\",\
+             + String(state.pump2) + "\",\
                \n\t\"valve1_state\": \""
-             + String(valve1_state) + "\",\
+             + String(state.valve1) + "\",\
                \n\t\"valve2_state\": \""
-             + String(valve2_state) + "\",\
+             + String(state.valve2) + "\",\
                \n\t\"fan1_state\": \""
-             + String(fan1_state) + "\",\
+             + String(state.fan1) + "\",\
                \n\t\"fan1_speed\": \""
              + String(fan1_speed) + "\",\
                \n\t\"fan2_state\": \""
-             + String(fan2_state) + "\",\
+             + String(state.fan2) + "\",\
                \n\t\"light_state\": \""
-             + String(light_state) + "\",\
+             + String(state.light) + "\",\
                \n\t\"light_on\": \""
-             + String(light_on) + "\",\
+             + String(schedule.light_on) + "\",\
                \n\t\"light_off\": \""
-             + String(light_off) + "\",\
+             + String(schedule.light_off) + "\",\
                \n\t\"scheduler_active\": \""
              + String(scheduler_active) + "\",\
                \n\t\"flow_rate\": \""
@@ -66,25 +66,25 @@ void notifyClients() {
                \n\t\"flow_quantity\": \""
              + String(totalMilliLitres) + "\",\
                \n\t\"spray_period\": \""
-             + String(spray_period) + "\",\
+             + String(schedule.spray_period) + "\",\
                \n\t\"spray_duration\": \""
-             + String(spray_duration) + "\",\
+             + String(schedule.spray_duration) + "\",\
                \n\t\"dhtValueTemp\": \""
-             + String(dhtValueTemp) + "\",\
+             + String(sensors.dhtValueTemp) + "\",\
                \n\t\"dhtValueHumidity\": \""
-             + String(dhtValueHumidity) + "\",\
+             + String(sensors.dhtValueHumidity) + "\",\
                \n\t\"dallasValueTemp\": \""
-             + String(dallasValueTemp) + "\",\
+             + String(sensors.dallasValueTemp) + "\",\
                \n\t\"ph_value\": \""
-             + String(ph_value) + "\",\
+             + String(sensors.ph_value) + "\",\
                \n\t\"ph_calibrated\": \""
              + String(ph_calibrated) + "\",\
                \n\t\"ph_analog\": \""
              + String(ph_analog) + "\",\
                \n\t\"ec_value\": \""
-             + String(ec_value) + "\",\
+             + String(sensors.ec_value) + "\",\
                \n\t\"water_state\": \""
-             + String(water_state) + "\"\
+             + String(state.water) + "\"\
                \n}");
 }
 
@@ -117,22 +117,22 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
 
     if (strcmp(command_type, "toggle") == 0) {
       if (strcmp(command_item, "pump1") == 0) {
-        pump1_state = !pump1_state;
+        state.pump1 = !state.pump1;
         scheduler_active = 0;
         notifyClients();
       }
       if (strcmp(command_item, "pump2") == 0) {
-        pump2_state = !pump2_state;
+        state.pump2 = !state.pump2;
         scheduler_active = 0;
         notifyClients();
       }
       if (strcmp(command_item, "valve1") == 0) {
-        valve1_state = !valve1_state;
+        state.valve1 = !state.valve1;
         scheduler_active = 0;
         notifyClients();
       }
       if (strcmp(command_item, "valve2") == 0) {
-        valve2_state = !valve2_state;
+        state.valve2 = !state.valve2;
         scheduler_active = 0;
         notifyClients();
       }
@@ -144,17 +144,17 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         notifyClients();
       }
       if (strcmp(command_item, "fan1") == 0) {
-        fan1_state = !fan1_state;
+        state.fan1 = !state.fan1;
         notifyClients();
       }
       if (strcmp(command_item, "fan2") == 0) {
-        fan2_state = !fan2_state;
+        state.fan2 = !state.fan2;
         notifyClients();
       }
       if (strcmp(command_item, "light") == 0) {
         D_PRINTLN("  [handleWebSocketMessage] light toggle command");
         light_toggle = 0;
-        light_state = !light_state;
+        state.light = !state.light;
         scheduler_active = 0;
         notifyClients();
       }
@@ -166,38 +166,38 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     }
     if (strcmp(command_type, "update") == 0) {
       if (strcmp(command_item, "light_on") == 0) {
-        light_on = garden_command["value"];
+        schedule.light_on = garden_command["value"];
         preferences.begin("garden", false);
-        preferences.putULong("light_on", light_on);
+        preferences.putULong("light_on", schedule.light_on);
         preferences.end();
-        tLightOn.setInterval(light_on * TASK_SECOND);
+        tLightOn.setInterval(schedule.light_on * TASK_SECOND);
         scheduler_active = 1;
         notifyClients();
       }
       if (strcmp(command_item, "light_off") == 0) {
-        light_off = garden_command["value"];
+        schedule.light_off = garden_command["value"];
         preferences.begin("garden", false);
-        preferences.putULong("light_off", light_off);
+        preferences.putULong("light_off", schedule.light_off);
         preferences.end();
-        tLightOn.setInterval(light_off * TASK_SECOND);
+        tLightOn.setInterval(schedule.light_off * TASK_SECOND);
         scheduler_active = 1;
         notifyClients();
       }
       if (strcmp(command_item, "spray_period") == 0) {
-        spray_period = garden_command["value"];
+        schedule.spray_period = garden_command["value"];
         preferences.begin("garden", false);
-        preferences.putULong("spray_period", spray_period);
+        preferences.putULong("spray_period", schedule.spray_period);
         preferences.end();
-        tPump.setInterval(spray_period * TASK_MILLISECOND);
+        tPump.setInterval(schedule.spray_period * TASK_MILLISECOND);
         scheduler_active = 1;
         notifyClients();
       }
       if (strcmp(command_item, "spray_duration") == 0) {
-        spray_duration = garden_command["value"];
+        schedule.spray_duration = garden_command["value"];
         preferences.begin("garden", false);
-        preferences.putULong("spray_duration", spray_duration);
+        preferences.putULong("spray_duration", schedule.spray_duration);
         preferences.end();
-        tPumpOff.setInterval(spray_duration * TASK_MILLISECOND);
+        tPumpOff.setInterval(schedule.spray_duration * TASK_MILLISECOND);
         scheduler_active = 1;
         notifyClients();
       }
@@ -238,13 +238,13 @@ void initWebSocket() {
 
 String processor(const String &var) {
   if (var == "PUMP1_STATE") {
-    return String(pump1_state);
+    return String(state.pump1);
   } else if (var == "PUMP2_STATE") {
-    return String(pump2_state);
+    return String(state.pump2);
   } else if (var == "VALVE1_STATE") {
-    return String(valve1_state);
+    return String(state.valve1);
   } else if (var == "VALVE2_STATE") {
-    return String(valve2_state);
+    return String(state.valve2);
   } else if (var == "SCHEDULER_ACTIVE") {
     return String(scheduler_active);
   } else if (var == "FLOW_RATE") {
@@ -252,37 +252,37 @@ String processor(const String &var) {
   } else if (var == "FLOW_QUANTITY") {
     return String(totalMilliLitres);
   } else if (var == "SPRAY_PERIOD") {
-    return String(spray_period);
+    return String(schedule.spray_period);
   } else if (var == "SPRAY_DURATION") {
-    return String(spray_duration);
+    return String(schedule.spray_duration);
   } else if (var == "FAN1_STATE") {
-    return String(fan1_state);
+    return String(state.fan1);
   } else if (var == "FAN2_STATE") {
-    return String(fan2_state);
+    return String(state.fan2);
   } else if (var == "FAN1_SPEED") {
     return String(fan1_speed);
   } else if (var == "LIGHT_STATE") {
-    return String(light_state);
+    return String(state.light);
   } else if (var == "LIGHT_ON") {
-    return String(light_on);
+    return String(schedule.light_on);
   } else if (var == "LIGHT_OFF") {
-    return String(light_off);
+    return String(schedule.light_off);
   } else if (var == "DHT_TEMP_VALUE") {
-    return String(dhtValueTemp);
+    return String(sensors.dhtValueTemp);
   } else if (var == "DHT_HUMIDITY_VALUE") {
-    return String(dhtValueHumidity);
+    return String(sensors.dhtValueHumidity);
   } else if (var == "DALLAS_TEMP_VALUE") {
-    return String(dallasValueTemp);
+    return String(sensors.dallasValueTemp);
   } else if (var == "WATER_STATE") {
-    return String(water_state);
+    return String(state.water);
   } else if (var == "PH_VALUE") {
-    return String(ph_value);
+    return String(sensors.ph_value);
   } else if (var == "PH_ANALOG") {
     return String(ph_analog);
   } else if (var == "PH_CALIBRATED") {
     return String(ph_calibrated);
   } else if (var == "EC_VALUE") {
-    return String(ec_value);
+    return String(sensors.ec_value);
   } else {
     D_PRINTLN("template: Unknown variable");
     return String("  [processor] Unknown variable");
@@ -299,20 +299,20 @@ void setPumpState_(esp_state& state) {
 }
 
 void setPumpState() {
-  digitalWrite(PUMP1_PIN, pump1_state);
-  digitalWrite(PUMP2_PIN, pump2_state);
+  digitalWrite(PUMP1_PIN, state.pump1);
+  digitalWrite(PUMP2_PIN, state.pump2);
 }
 
 void enableSpray() {
   D_PRINT("  [enableSpray] Enabling spray ");
   D_PRINTLN(active_pump);
   if (active_pump == 1) {
-    pump1_state = 0;
+    state.pump1 = 0;
   }
   if (active_pump == 2) {
-    pump2_state = 0;
+    state.pump2 = 0;
   }
-  //valve1_state = 0;
+  //state.valve1 = 0;
   tOpenValve1.restartDelayed();
   notifyClients();
   tPumpOff.restartDelayed();
@@ -322,12 +322,12 @@ void disableSpray() {
   D_PRINT("  [disableSpray] Disabling Spray ");
   D_PRINTLN(active_pump);
   if (active_pump == 1) {
-    pump1_state = 1;
+    state.pump1 = 1;
   }
   if (active_pump == 2) {
-    pump2_state = 1;
+    state.pump2 = 1;
   }
-  valve1_state = 1;
+  state.valve1 = 1;
   notifyClients();
 };
 
@@ -337,20 +337,20 @@ void disableSpray() {
 
 void openValve1()
 {
-  valve1_state=0;
+  state.valve1=0;
 }
 
 void setValveState() {
-  digitalWrite(VALVE1_PIN, valve1_state);
-  digitalWrite(VALVE2_PIN, valve2_state);
+  digitalWrite(VALVE1_PIN, state.valve1);
+  digitalWrite(VALVE2_PIN, state.valve2);
 }
 
 //////////////////////////////////////////////
 /// Fans
 
 void setFanState() {
-  digitalWrite(FAN1_PIN, fan1_state);
-  digitalWrite(FAN2_PIN, fan2_state);
+  digitalWrite(FAN1_PIN, state.fan1);
+  digitalWrite(FAN2_PIN, state.fan2);
 }
 
 void setFanPwm(int pin, int duty) {
@@ -381,13 +381,13 @@ UnitecRCSwitch::ButtonCodes codes = {
 
 void setLightState() {
   if (light_toggle == 0) {
-    if (light_state == 1) {
+    if (state.light == 1) {
       // Turn light off
       D_PRINTLN("  [setLightState] Turning light off");
       mySwitch.switchOff(UnitecRCSwitch::SOCKET_A);
     }
 
-    if (light_state == 0) {
+    if (state.light == 0) {
       // Turn light on
       D_PRINTLN("  [setLightState] Turning light on");
       mySwitch.switchOn(UnitecRCSwitch::SOCKET_A);
@@ -398,7 +398,7 @@ void setLightState() {
 
 void enableLight() {
   D_PRINTLN("  [enableLight] Enabling light");
-  light_state = 0;
+  state.light = 0;
   light_toggle = 0;
   notifyClients();
   tLightOff.restartDelayed();
@@ -406,7 +406,7 @@ void enableLight() {
 
 void disableLight() {
   D_PRINTLN("  [disableLight] Disabling Light ");
-  light_state = 1;
+  state.light = 1;
   light_toggle = 0;
   notifyClients();
 };
@@ -459,29 +459,29 @@ void getFlowRate() {
 
 // DHT Humidity/Temperature
 void getDhtValue() {
-  dhtValueTemp = dht.readTemperature();
-  dhtValueHumidity = dht.readHumidity();
-  if (isnan(dhtValueTemp) || isnan(dhtValueHumidity)) {
+  sensors.dhtValueTemp = dht.readTemperature();
+  sensors.dhtValueHumidity = dht.readHumidity();
+  if (isnan(sensors.dhtValueTemp) || isnan(sensors.dhtValueHumidity)) {
     Serial.println(F("Failed to read from DHT sensor!"));
     return;
   } else {
     D_PRINT("  [getDhtValue] DHT Temperature:");
-    D_PRINTLN(dhtValueTemp);
+    D_PRINTLN(sensors.dhtValueTemp);
     D_PRINT("  [getDhtValue] DHT Humidity:");
-    D_PRINTLN(dhtValueHumidity);
+    D_PRINTLN(sensors.dhtValueHumidity);
   }
 }
 
 // 18B20 Temperature
 void getTempValue() {
   temp_sensor.requestTemperatures();
-  dallasValueTemp = temp_sensor.getTempCByIndex(0);
-  if (isnan(dallasValueTemp)) {
+  sensors.dallasValueTemp = temp_sensor.getTempCByIndex(0);
+  if (isnan(sensors.dallasValueTemp)) {
     Serial.println(F("Failed to read from 18B20 sensor!"));
     return;
   } else {
     D_PRINT("  [getTempValue] 18B20 Temperature:");
-    D_PRINTLN(dallasValueTemp);
+    D_PRINTLN(sensors.dallasValueTemp);
   }
 }
 
@@ -489,14 +489,14 @@ void getTempValue() {
 void getPhValue(float ph_calibration_m, float ph_calibration_b) {
   ph_analog = readPhAnalog(phSampleSize, PH_PIN);
   float ph_voltage = analog2Voltage(ph_analog);
-  ph_value = voltage2Ph(ph_voltage, ph_calibration_m, ph_calibration_b);
+  sensors.ph_value = voltage2Ph(ph_voltage, ph_calibration_m, ph_calibration_b);
 
   D_PRINT("  [getPhAnalog]: ");
   D_PRINTLN(ph_analog);
   D_PRINT("  [getPhVoltage]: ");
   D_PRINTLN(ph_voltage);
   D_PRINT("  [getPhValue]: ");
-  D_PRINTLN(ph_value);
+  D_PRINTLN(sensors.ph_value);
 }
 
 void sortArray(int *array, int size) {
@@ -590,24 +590,24 @@ void calibratePh(int ph_calib) {
 
 // ecc value
 void getEcValue() {
-  if (isnan(ec_value)) {
+  if (isnan(sensors.ec_value)) {
     Serial.println(F("Failed to read from ec sensor!"));
     return;
   } else {
     D_PRINT("  [getEcValue] ec value:");
-    D_PRINTLN(ec_value);
+    D_PRINTLN(sensors.ec_value);
   }
 }
 
 // water level
 void getWaterState() {
-  bool state = digitalRead(LEVEL_PIN);
-  if (state == LOW) {
+  bool state_water = digitalRead(LEVEL_PIN);
+  if (state_water == LOW) {
     D_PRINTLN("  [getWaterState] Water ok");
-    water_state = 1;
+    state.water = 1;
   } else {
     D_PRINTLN("  [getWaterState] Water low");
-    water_state = 0;
+    state.water = 0;
   }
 }
 
@@ -695,11 +695,11 @@ void setup() {
 
   // configure preferences structure for persistent saving
   preferences.begin("garden", true);
-  spray_period = preferences.getULong("spray_period", 10000);
-  spray_duration = preferences.getULong("spray_duration", 1000);
-  light_on = preferences.getULong("light_on", 12);
-  light_off = preferences.getULong("light_off", 12);
-  valve1_delay = preferences.getULong("valve1_delay", 100);
+  schedule.spray_period = preferences.getULong("spray_period", 10000);
+  schedule.spray_duration = preferences.getULong("spray_duration", 1000);
+  schedule.light_on = preferences.getULong("light_on", 12);
+  schedule.light_off = preferences.getULong("light_off", 12);
+  schedule.valve1_delay = preferences.getULong("valve1_delay", 100);
   scheduler_active = preferences.getBool("scheduler", 0);
   ph_calibration_b = preferences.getFloat("ph_calibration_b", 1);
   ph_calibration_m = preferences.getFloat("ph_calibration_m", 1);
@@ -709,15 +709,15 @@ void setup() {
   ph_calibrated = isCalibrated();
 
   // setup Scheduler intervals for pumps
-  tPump.setInterval(spray_period * TASK_MILLISECOND);
-  tPumpOff.setInterval(spray_duration * TASK_MILLISECOND);
+  tPump.setInterval(schedule.spray_period * TASK_MILLISECOND);
+  tPumpOff.setInterval(schedule.spray_duration * TASK_MILLISECOND);
 
   // setup Scheduler intervals for light
-  tLightOn.setInterval(light_on * TASK_SECOND);
-  tLightOff.setInterval(light_off * TASK_SECOND);
+  tLightOn.setInterval(schedule.light_on * TASK_SECOND);
+  tLightOff.setInterval(schedule.light_off * TASK_SECOND);
 
   // setup Scheduler intervals for valves
-  tOpenValve1.setInterval(valve1_delay * TASK_SECOND);
+  tOpenValve1.setInterval(schedule.valve1_delay * TASK_SECOND);
 
   // start websocket
   initWebSocket();

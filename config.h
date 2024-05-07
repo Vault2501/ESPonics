@@ -19,4 +19,12 @@
 #define PH_PIN 36     //A0, VP
 #define LEVEL_PIN 39  //A3. VN
 
+// Spray schedule defaults (milliseconds)
+#define SPRAY_PERIOD 10000
+#define SPRAY_DURATION 1000
+#define VALVE1_DELAY 100
+// Light schedule defaults (hours)
+#define LIGHT_ON 12
+#define LIGHT_OFF 12
+
 #endif
