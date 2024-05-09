@@ -13,6 +13,7 @@
 #include "vars.h"
 #include "setup.h"
 #include "wifimanager.h"
+#include "ph.h"
 
 Preferences preferences;
 
