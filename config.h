@@ -16,7 +16,7 @@
 // Sensor pins
 #define TEMP_PIN 33
 #define DHT_PIN 26
-#define EC_PIN 35
+#define TDS_PIN 35
 #define PH_PIN 36     //A0, VP
 #define LEVEL_PIN 39  //A3. VN
 

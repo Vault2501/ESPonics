@@ -13,7 +13,7 @@ class Ph
     void setPin(int pin);
     void setTemperature(float temp);
     bool isCalibrated();
-    void calibratePh(int ph_calib);
+    void calibrate(int ph_calib);
     float getPh();
     float getCalibB();
     float getCalibM();

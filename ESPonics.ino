@@ -14,6 +14,7 @@
 #include "setup.h"
 #include "wifimanager.h"
 #include "ph.h"
+#include "tds.h"
 
 Preferences preferences;
 
@@ -21,6 +22,9 @@ AsyncWebServer server(8080);
 AsyncWebSocket ws("/ws");
 
 DHT dht(DHT_PIN, DHTTYPE);
+
+Ph ph;
+TDS tds;
 
 OneWire oneWire(TEMP_PIN);
 DallasTemperature temp_sensor(&oneWire);
@@ -161,8 +165,9 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         notifyClients();
       }
       if (strcmp(command_item, "calibrate_ph") == 0) {
-        int ph = garden_command["value"];
-        calibratePh(ph);
+        int phc = garden_command["value"];
+        //calibratePh(phc);
+        ph.calibrate(phc);        
         notifyClients();
       }
     }
@@ -487,109 +492,6 @@ void getTempValue() {
   }
 }
 
-// ph value
-void getPhValue(float ph_calibration_m, float ph_calibration_b) {
-  ph_analog = readPhAnalog(phSampleSize, PH_PIN);
-  float ph_voltage = analog2Voltage(ph_analog);
-  sensors.ph_value = voltage2Ph(ph_voltage, ph_calibration_m, ph_calibration_b);
-
-  D_PRINT("  [getPhAnalog]: ");
-  D_PRINTLN(ph_analog);
-  D_PRINT("  [getPhVoltage]: ");
-  D_PRINTLN(ph_voltage);
-  D_PRINT("  [getPhValue]: ");
-  D_PRINTLN(sensors.ph_value);
-}
-
-void sortArray(int *array, int size) {
-  int temp;
-  for (int i = 0; i < (size - 1); i++) {
-    for (int j = i + 1; j < size; j++) {
-      if (array[i] > array[j]) {
-        temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-      }
-    }
-  }
-}
-
-int readPhAnalog(int sampleSize, int pin) {
-  // read sampleSize amount of values
-  int buf[sampleSize];
-  int sumValue = 0;
-  int avgValue = 0;
-  for (int i = 0; i < sampleSize; i++) {
-    for (int i = 0; i < sampleSize; i++) {
-      buf[i] = analogRead(pin);
-      delay(10);
-    }
-  }
-
-  sortArray(buf, sampleSize);
-
-  // ignore the lowest and highest 20% of the sample
-  int ignore = (int((sampleSize * 20) / 100));
-  for (int i = ignore; i < (sampleSize - ignore); i++) {
-    sumValue += buf[i];
-  }
-  avgValue = sumValue / (sampleSize - (2 * ignore));
-
-  return avgValue;
-}
-
-float analog2Voltage(float analogValue) {
-  float voltage = (float)analogValue * (3.3 / 4095.0);
-  return voltage;
-}
-
-float voltage2Ph(float voltage, float cal_m, float cal_b) {
-  float phValue = cal_m * voltage + cal_b;
-  return phValue;
-}
-
-bool isCalibrated() {
-  if (settings.ph_calibration_m != 1 && settings.ph_calibration_b != 0) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-void calcCalibration(float ph1, float ph2, float phAnalog1, float phAnalog2) {
-  settings.ph_calibration_m = (ph2 - ph1) / (phAnalog2 - phAnalog1);
-  settings.ph_calibration_b = ph1 - (settings.ph_calibration_m * phAnalog1);
-  D_PRINT("  [calcCalibration] settings.ph_calibration_b: ");
-  D_PRINTLN(settings.ph_calibration_b);
-  D_PRINT("  [calcCalibration] settings.ph_calibration_m: ");
-  D_PRINTLN(settings.ph_calibration_m);
-}
-
-
-void calibratePh(int ph_calib) {
-  if (ph_calib == 401) {
-    ph_analog_401 = readPhAnalog(phSampleSize, PH_PIN);
-    D_PRINT("  [calibratePh] ph_analog_401: ");
-    D_PRINTLN(ph_analog_401);
-  } else if (ph_calib == 686) {
-    ph_analog_686 = readPhAnalog(phSampleSize, PH_PIN);
-    D_PRINT("  [calibratePh] ph_analog_686: ");
-    D_PRINTLN(ph_analog_686);
-  } else {
-    Serial.print("Unknown ph calibration value: ");
-    Serial.println(ph_calib);
-  }
-  if (ph_analog_401 != -1 && ph_analog_686 != -1) {
-    calcCalibration(4.01, 6.86, ph_analog_401, ph_analog_686);
-    preferences.begin("garden", false);
-    preferences.putULong("ph_calibration_b", settings.ph_calibration_b);
-    preferences.putULong("ph_calibration_m", settings.ph_calibration_m);
-    preferences.end();
-    ph_analog_401 = -1;
-    ph_analog_686 = -1;
-  }
-}
-
 // ecc value
 void getEcValue() {
   if (isnan(sensors.ec_value)) {
@@ -621,7 +523,8 @@ void readSensors() {
     getTempValue();
     getDhtValue();
     //getEcValue;
-    getPhValue(settings.ph_calibration_m, settings.ph_calibration_b);
+    //getPhValue(settings.ph_calibration_m, settings.ph_calibration_b);
+    sensors.ph_value = ph.getPh();
 
     notifyClients();
     previousMillis = millis();
@@ -646,6 +549,10 @@ void setup() {
   // // initialize dht
   //pinMode(DHT_PIN, INPUT);
   dht.begin();
+
+  // initialize ph
+  ph.setPin(PH_PIN);
+  ph.begin();
 
   // initialize 18B20 temperature sensor
   temp_sensor.begin();
@@ -679,10 +586,12 @@ void setup() {
   settings.scheduler_active = preferences.getBool("scheduler", SCHEDULER_ACTIVE);
   settings.ph_calibration_b = preferences.getFloat("ph_calibration_b", PH_CALIBRATION_B);
   settings.ph_calibration_m = preferences.getFloat("ph_calibration_m", PH_CALIBRATION_M);
+  ph.setCalib(settings.ph_calibration_b, settings.ph_calibration_m);
   preferences.end();
 
   // check for calibration
-  settings.ph_calibrated = isCalibrated();
+  //settings.ph_calibrated = isCalibrated();
+  settings.ph_calibrated = ph.isCalibrated();
 
   // setup Scheduler intervals for pumps
   tPump.setInterval(schedule.spray_period * TASK_MILLISECOND);

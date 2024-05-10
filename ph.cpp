@@ -114,7 +114,7 @@ void Ph::setCalibration(float ph1, float ph2, float phAnalog1, float phAnalog2) 
   //D_PRINTLN(this->calibration_m);
 }
 
-void Ph::calibratePh(int ph_calib) {
+void Ph::calibrate(int ph_calib) {
   if (ph_calib == 401) {
     this->analog_401 = this->readAnalog(this->sampleSize, this->pin);
     //D_PRINT("  [Ph::calibratePh] this->analog_401: ");
