@@ -1,25 +1,14 @@
 #include "config.h"
 
-#define DEBUG
-#define DHTTYPE DHT22
-
-#ifdef DEBUG
-#define D_PRINT(x) Serial.print(x)
-#define D_PRINTDEC(x) Serial.print(x, DEC)
-#define D_PRINTLN(x) Serial.println(x)
-#else
-#define D_PRINT(x)
-#define D_PRINTDEC(x)
-#define D_PRINTLN(x)
-#endif
-
 struct esp_settings {
   bool scheduler_active;
   int active_pump;
   int fan1_speed;
   bool ph_calibrated;
+  bool tds_calibrated;
   float ph_calibration_b;
   float ph_calibration_m;
+  float tds_kvalue;
 };
 
 struct esp_state {
@@ -46,7 +35,9 @@ struct esp_sensors {
   float dhtValueHumidity;
   float dallasValueTemp;
   float ph_value;
-  float ec_value;
+  float ph_analog;
+  float tds_value;
+  float tds_analog;
   int interval;
 };
 
@@ -54,8 +45,10 @@ esp_settings settings={SCHEDULER_ACTIVE,
                        ACTIVE_PUMP,
                        FAN1_SPEED,
                        PH_CALIBRATED,
+                       TDS_CALIBRATED,
                        PH_CALIBRATION_B,
-                       PH_CALIBRATION_M};
+                       PH_CALIBRATION_M,
+                       TDS_KVALUE};
 
 esp_state state={1,
                  1,
@@ -77,6 +70,8 @@ esp_sensors sensors = {0,
                        0,
                        7,
                        0,
+                       0,
+                       0,
                        SENSOR_INTERVAL};
 
 
@@ -86,11 +81,12 @@ esp_sensors sensors = {0,
 // Toggle light (0=yes,1=no)
 bool light_toggle = 1;
 
-// Calibration values
-const int phSampleSize = 10;
-int ph_analog_686 = -1;
-int ph_analog_401 = -1;
-int ph_analog = 0;
+// ph variables
+//const int phSampleSize = 10;
+//int ph_analog_686 = -1;
+//int ph_analog_401 = -1;
+//int ph_analog = 0;
+//int tds_analog = 0;
 
 // Flow meter vars
 //int interval = 1000;

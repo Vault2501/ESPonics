@@ -86,9 +86,13 @@ void notifyClients() {
                \n\t\"ph_calibrated\": \""
              + String(settings.ph_calibrated) + "\",\
                \n\t\"ph_analog\": \""
-             + String(ph_analog) + "\",\
-               \n\t\"ec_value\": \""
-             + String(sensors.ec_value) + "\",\
+             + String(sensors.ph_analog) + "\",\
+               \n\t\"tds_value\": \""
+             + String(sensors.tds_value) + "\",\
+               \n\t\"tds_calibrated\": \""
+             + String(settings.tds_calibrated) + "\",\
+               \n\t\"tds_analog\": \""
+             + String(sensors.tds_analog) + "\",\
                \n\t\"water_state\": \""
              + String(state.water) + "\"\
                \n}");
@@ -170,6 +174,11 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         ph.calibrate(phc);        
         notifyClients();
       }
+      if (strcmp(command_item, "calibrate_tds") == 0) {
+        float tdsc = garden_command["value"];
+        tds.calibrate(tdsc);
+        notifyClients(); 
+      }       
     }
     if (strcmp(command_type, "update") == 0) {
       if (strcmp(command_item, "light_on") == 0) {
@@ -285,11 +294,15 @@ String processor(const String &var) {
   } else if (var == "PH_VALUE") {
     return String(sensors.ph_value);
   } else if (var == "PH_ANALOG") {
-    return String(ph_analog);
+    return String(sensors.ph_analog);
   } else if (var == "PH_CALIBRATED") {
     return String(settings.ph_calibrated);
-  } else if (var == "EC_VALUE") {
-    return String(sensors.ec_value);
+  } else if (var == "TDS_VALUE") {
+    return String(sensors.tds_value);
+  } else if (var == "TDS_ANALOG") {
+    return String(sensors.tds_analog);
+  } else if (var == "TDS_CALIBRATED") {
+    return String(settings.tds_calibrated);  
   } else {
     D_PRINTLN("template: Unknown variable");
     return String("  [processor] Unknown variable");
@@ -492,16 +505,16 @@ void getTempValue() {
   }
 }
 
-// ecc value
-void getEcValue() {
-  if (isnan(sensors.ec_value)) {
-    Serial.println(F("Failed to read from ec sensor!"));
-    return;
-  } else {
-    D_PRINT("  [getEcValue] ec value:");
-    D_PRINTLN(sensors.ec_value);
-  }
-}
+// // ecc value
+// void getEcValue() {
+//   if (isnan(sensors.ec_value)) {
+//     Serial.println(F("Failed to read from ec sensor!"));
+//     return;
+//   } else {
+//     D_PRINT("  [getEcValue] ec value:");
+//     D_PRINTLN(sensors.ec_value);
+//   }
+// }
 
 // water level
 void getWaterState() {
@@ -525,6 +538,10 @@ void readSensors() {
     //getEcValue;
     //getPhValue(settings.ph_calibration_m, settings.ph_calibration_b);
     sensors.ph_value = ph.getPh();
+    sensors.ph_value = ph.getAnalogValue();
+    tds.update();
+    sensors.tds_value = tds.getTdsValue();
+    sensors.tds_analog = tds.getAnalogValue();
 
     notifyClients();
     previousMillis = millis();
@@ -553,6 +570,9 @@ void setup() {
   // initialize ph
   ph.setPin(PH_PIN);
   ph.begin();
+
+  tds.setPin(TDS_PIN);
+  tds.begin();
 
   // initialize 18B20 temperature sensor
   temp_sensor.begin();
@@ -587,11 +607,14 @@ void setup() {
   settings.ph_calibration_b = preferences.getFloat("ph_calibration_b", PH_CALIBRATION_B);
   settings.ph_calibration_m = preferences.getFloat("ph_calibration_m", PH_CALIBRATION_M);
   ph.setCalib(settings.ph_calibration_b, settings.ph_calibration_m);
+  settings.tds_kvalue = preferences.getFloat("tds_kvalue", TDS_KVALUE);
+  tds.setKvalue(settings.tds_kvalue);
   preferences.end();
 
   // check for calibration
   //settings.ph_calibrated = isCalibrated();
   settings.ph_calibrated = ph.isCalibrated();
+  settings.tds_calibrated = tds.isCalibrated();
 
   // setup Scheduler intervals for pumps
   tPump.setInterval(schedule.spray_period * TASK_MILLISECOND);

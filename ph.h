@@ -1,3 +1,15 @@
+#define DEBUG_PH
+
+#ifdef DEBUG_PH
+#define D_PH_PRINT(x) Serial.print(x)
+#define D_PH_PRINTDEC(x) Serial.print(x, DEC)
+#define D_PH_PRINTLN(x) Serial.println(x)
+#else
+#define D_PH_PRINT(x)
+#define D_PH_PRINTDEC(x)
+#define D_PH_PRINTLN(x)
+#endif
+
 #ifndef PH_H
 #define PH_H
 
@@ -15,6 +27,7 @@ class Ph
     bool isCalibrated();
     void calibrate(int ph_calib);
     float getPh();
+    int getAnalogValue();
     float getCalibB();
     float getCalibM();
     void setCalib(float calib_b, float calib_m);

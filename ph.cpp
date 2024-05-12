@@ -11,7 +11,7 @@ Ph::Ph()
   this->calibration_b = PH_CALIBRATION_B;
   this->calibration_m = PH_CALIBRATION_M;
   this->ph = 7;
-  this->sampleSize = 10;
+  this->sampleSize = PH_SAMPLESIZE;
 }
 
 Ph::~Ph()
@@ -56,16 +56,20 @@ void Ph::readPh(float ph_calibration_m, float ph_calibration_b) {
   float ph_voltage = this->analog2Voltage(this->analog);
   this->ph = this->voltage2Ph(ph_voltage, this->calibration_m, this->calibration_b);
 
-  //D_PRINT("  [getPhAnalog]: ");
-  //D_PRINTLN(ph_analog);
-  //D_PRINT("  [getPhVoltage]: ");
-  //D_PRINTLN(ph_voltage);
-  //D_PRINT("  [getPhValue]: ");
-  //D_PRINTLN(sensors.ph_value);
+  D_PH_PRINT("  [Ph::readPh analog]: ");
+  D_PH_PRINTLN(analog);
+  D_PH_PRINT("  [Ph::readPh voltage]: ");
+  D_PH_PRINTLN(ph_voltage);
+  D_PH_PRINT("  [Ph::readPh: ph]: ");
+  D_PH_PRINTLN(ph);
 }
 
 float Ph::getPh() {
   return this->ph;
+}
+
+int Ph::getAnalogValue() {
+  return this->analog;
 }
 
 float Ph::getCalibB() {
@@ -108,21 +112,21 @@ int Ph::readAnalog(int sampleSize, int pin) {
 void Ph::setCalibration(float ph1, float ph2, float phAnalog1, float phAnalog2) {
   this->calibration_m = (ph2 - ph1) / (phAnalog2 - phAnalog1);
   this->calibration_b = ph1 - (this->calibration_m * phAnalog1);
-  //D_PRINT("  [Ph::calcCalibration] this->calibration_b: ");
-  //D_PRINTLN(this->calibration_b);
-  //D_PRINT("  [Ph::calcCalibration] this->calibration_m: ");
-  //D_PRINTLN(this->calibration_m);
+  D_PH_PRINT("  [Ph::calcCalibration] this->calibration_b: ");
+  D_PH_PRINTLN(this->calibration_b);
+  D_PH_PRINT("  [Ph::calcCalibration] this->calibration_m: ");
+  D_PH_PRINTLN(this->calibration_m);
 }
 
 void Ph::calibrate(int ph_calib) {
   if (ph_calib == 401) {
     this->analog_401 = this->readAnalog(this->sampleSize, this->pin);
-    //D_PRINT("  [Ph::calibratePh] this->analog_401: ");
-    //D_PRINTLN(this->analog_401);
+    D_PH_PRINT("  [Ph::calibratePh] this->analog_401: ");
+    D_PH_PRINTLN(this->analog_401);
   } else if (ph_calib == 686) {
     this->analog_686 = this->readAnalog(this->sampleSize, this->pin);
-    //D_PRINT("  [Ph::calibratePh] this->analog_686: ");
-    //D_PRINTLN(this->analog_686);
+    D_PH_PRINT("  [Ph::calibratePh] this->analog_686: ");
+    D_PH_PRINTLN(this->analog_686);
   } else {
     Serial.print("Unknown ph calibration value: ");
     Serial.println(ph_calib);

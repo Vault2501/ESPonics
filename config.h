@@ -1,3 +1,15 @@
+//#define DEBUG_MAIN
+
+#ifdef DEBUG_MAIN
+#define D_PRINT(x) Serial.print(x)
+#define D_PRINTDEC(x) Serial.print(x, DEC)
+#define D_PRINTLN(x) Serial.println(x)
+#else
+#define D_PRINT(x)
+#define D_PRINTDEC(x)
+#define D_PRINTLN(x)
+#endif
+
 #ifndef CONFIG
 #define CONFIG
 
@@ -19,6 +31,9 @@
 #define TDS_PIN 35
 #define PH_PIN 36     //A0, VP
 #define LEVEL_PIN 39  //A3. VN
+
+// dht type
+#define DHTTYPE DHT22
 
 // Default PWM properties
 #define PWM_FREQ 25000
@@ -46,6 +61,13 @@
 #define PH_CALIBRATED false
 #define PH_CALIBRATION_B 0
 #define PH_CALIBRATION_M 1
+#define TDS_CALIBRATED false
+#define TDS_KVALUE 1.0
+// PH sample size
+#define PH_SAMPLESIZE 10
+// TDS values
+#define TDS_AREF 3.3
+#define TDS_ADCRANGE 4096
 
 
 #endif

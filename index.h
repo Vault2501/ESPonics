@@ -159,7 +159,17 @@ const char index_html[] PROGMEM = R"rawliteral(
       color:#8c8c8c;
       font-weight: bold;
     }
-    .ec_value {
+    .tds_value {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .tds_analog {
+      font-size: 1.5rem;
+      color:#8c8c8c;
+      font-weight: bold;
+    }
+    .tds_calibrated {
       font-size: 1.5rem;
       color:#8c8c8c;
       font-weight: bold;
@@ -221,8 +231,8 @@ const char index_html[] PROGMEM = R"rawliteral(
       <h2>ph Value</h2>
       <p class="ph_value">State: <span id="ph_value">%PH_VALUE%</span></p>
 
-      <h2>ec Value</h2>
-      <p class="ec_value">State: <span id="ec_value">%EC_VALUE%</span></p>
+      <h2>tds Value</h2>
+      <p class="tds_value">State: <span id="tds_value">%TDS_VALUE%</span></p>
 
       <h2>Water State</h2>
       <p class="water_state">State: <span id="water_state">%WATER_STATE%</span></p>
@@ -299,7 +309,15 @@ const char index_html[] PROGMEM = R"rawliteral(
       <h2>Calibrate pH 6.86</h2>
       <p>Put ph sensor in calibration liquid with ph 6.86 and wait until the value does not change anymore.
          Then click the calibrate button</p>
-      <p><button id="calibrate_ph686_button" class="button">Calibrate</button></p>      
+      <p><button id="calibrate_ph686_button" class="button">Calibrate</button></p>
+
+      <p class="tds_calibrated">State: <span id="tds_calibrated">%TDS_CALIBRATED%</span></p>
+      <p class "tds_analog">TDS Analog Value: <span id="tds_analog">%TDS_ANALOG%</span></p>
+
+      <h2>Calibrate tds 1412</h2>
+      <p>Put ph sensor in calibration liquid with tds value of 1412 and wait until the value does not change anymore.
+         Then click the calibrate button</p>
+      <p><button id="calibrate_tds_button" class="button">Calibrate</button></p>  
     </div>
   </div>
 
@@ -405,6 +423,12 @@ const char index_html[] PROGMEM = R"rawliteral(
     else {
       ph_calibrated_display = "UNCALIBRATED";
     }
+    if (garden.tds_calibrated == true) {
+      tds_calibrated_display = "CALIBRATED";
+    }
+    else {
+      tds_calibrated_display = "UNCALIBRATED";
+    }
     document.getElementById('pump1_state').innerHTML = pump1_state_display;
     document.getElementById('pump2_state').innerHTML = pump2_state_display;
     document.getElementById('valve1_state').innerHTML = valve1_state_display;
@@ -427,7 +451,9 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('ph_value').innerHTML = garden.ph_value;
     document.getElementById('ph_analog').innerHTML = garden.ph_analog;
     document.getElementById('ph_calibrated').innerHTML = ph_calibrated_display;
-    document.getElementById('ec_value').innerHTML = garden.ec_value;
+    document.getElementById('tds_value').innerHTML = garden.tds_value;
+    document.getElementById('tds_analog').innerHTML = garden.tds_analog;
+    document.getElementById('tds_calibrated').innerHTML = tds_calibrated_display;
     document.getElementById('water_state').innerHTML = water_state_display;
   }
   function onLoad(event) {
@@ -450,6 +476,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('update_spray_duration_button').addEventListener('click', update_spray_duration);
     document.getElementById('calibrate_ph401_button').addEventListener('click', calibrate_ph401);
     document.getElementById('calibrate_ph686_button').addEventListener('click', calibrate_ph686);
+    document.getElementById('calibrate_tds_button').addEventListener('click', calibrate_tds);
   }
   function toggle_pump1() {
     garden_command.type = "toggle";
@@ -553,6 +580,13 @@ const char index_html[] PROGMEM = R"rawliteral(
     garden_command.type = "toggle";
     garden_command.item = "calibrate_ph";
     garden_command.value = 401;
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function calibrate_tds() {
+    garden_command.type = "toggle";
+    garden_command.item = "calibrate_tds";
+    garden_command.value = 1412;
     const garden_data = JSON.stringify(garden_command);
     websocket.send(garden_data);
   }
