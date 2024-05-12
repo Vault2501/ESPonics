@@ -53,5 +53,3 @@ long currentMillis = 0;
 long previousMillis = 0;
 long currentFlowMillis = 0;
 long previousFlowMillis = 0;
-
-#endif

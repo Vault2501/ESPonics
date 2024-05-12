@@ -504,7 +504,7 @@ void readSensors() {
     getDhtValue(dht, sensors);
     ph.update();
     sensors.ph_value = ph.getPh();
-    sensors.ph_value = ph.getAnalogValue();
+    sensors.ph_analog = ph.getAnalogValue();
     tds.update();
     sensors.tds_value = tds.getTdsValue();
     sensors.tds_analog = tds.getAnalogValue();
@@ -590,7 +590,7 @@ void setup() {
   tLightOff.setInterval(schedule.light_off * TASK_SECOND);
 
   // setup Scheduler intervals for valves
-  tOpenValve1.setInterval(schedule.valve1_delay * TASK_SECOND);
+  tOpenValve1.setInterval(schedule.valve1_delay * TASK_MILLISECOND);
 
   // start websocket
   initWebSocket();
