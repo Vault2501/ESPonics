@@ -313,12 +313,8 @@ String processor(const String &var) {
 //////////////////////////////////////////////
 /// Pumps
 
-void setPumpState_(esp_state& state) {
-  digitalWrite(PUMP1_PIN, state.pump1);
-  digitalWrite(PUMP2_PIN, state.pump2);
-}
 
-void setPumpState() {
+void setPumpState(esp_state& state) {
   digitalWrite(PUMP1_PIN, state.pump1);
   digitalWrite(PUMP2_PIN, state.pump2);
 }
@@ -505,16 +501,6 @@ void getTempValue() {
   }
 }
 
-// // ecc value
-// void getEcValue() {
-//   if (isnan(sensors.ec_value)) {
-//     Serial.println(F("Failed to read from ec sensor!"));
-//     return;
-//   } else {
-//     D_PRINT("  [getEcValue] ec value:");
-//     D_PRINTLN(sensors.ec_value);
-//   }
-// }
 
 // water level
 void getWaterState() {
@@ -535,8 +521,6 @@ void readSensors() {
     getWaterState();
     getTempValue();
     getDhtValue();
-    //getEcValue;
-    //getPhValue(settings.ph_calibration_m, settings.ph_calibration_b);
     ph.update();
     sensors.ph_value = ph.getPh();
     sensors.ph_value = ph.getAnalogValue();
@@ -647,7 +631,7 @@ void loop() {
   }
 
   getFlowRate();
-  setPumpState();
+  setPumpState(state);
   setValveState();
   setFanState();
   setLightState();
