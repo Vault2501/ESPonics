@@ -60,5 +60,31 @@ float TDS::getTdsValue()
 
 float TDS::getEcValue()
 {
-      return ecValue25;
+  return ecValue25;
+}
+
+void TDS::setKvalue(float KValue)
+{
+  this->kValue=KValue;
+}
+
+bool TDS::isCalibrated()
+{
+  if(kValue == 1.0)
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+void TDS::calibrate(float calib)
+{
+  float rawECsolution;
+
+  rawECsolution = calib/(float)(TdsFactor);
+  this->update();
+  kValue = rawECsolution/(133.42*voltage*voltage*voltage - 255.86*voltage*voltage + 857.39*voltage);
 }

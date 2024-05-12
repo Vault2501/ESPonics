@@ -21,8 +21,8 @@ class TDS
     float getKvalue(); 
     float getTdsValue();
     float getEcValue();
-    void calibrate(int calib);
-    void setCalib(float kValue);
+    void calibrate(float calib);
+    void setKvalue(float Kvalue);
     bool isCalibrated();
 
   private:
