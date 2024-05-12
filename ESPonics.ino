@@ -10,12 +10,14 @@
 #include <ArduinoJson.h>
 #include <Preferences.h>
 #include "index.h"
+#include "struct.h"
 #include "vars.h"
 #include "setup.h"
 #include "wifimanager.h"
 #include "ph.h"
 #include "tds.h"
 #include "config.h"
+#include "sensors.h"
 
 Preferences preferences;
 
@@ -47,7 +49,8 @@ Task tOpenValve1(schedule.valve1_delay *TASK_MILLISECOND, TASK_ONCE, &openValve1
 // Web part
 
 void notifyClients() {
-  ws.textAll("{\n\t\"pump1_state\": \"" + String(state.pump1) + "\",\
+  ws.textAll("{\n\t\"pump1_state\": \""
+             + String(state.pump1) + "\",\
                \n\t\"pump2_state\": \""
              + String(state.pump2) + "\",\
                \n\t\"valve1_state\": \""
@@ -333,7 +336,7 @@ String processor(const String &var) {
 /// Pumps
 
 
-void setPumpState(esp_state& state) {
+void setPumpState() {
   digitalWrite(PUMP1_PIN, state.pump1);
   digitalWrite(PUMP2_PIN, state.pump2);
 }
@@ -492,54 +495,13 @@ void getFlowRate() {
 }
 
 
-// DHT Humidity/Temperature
-void getDhtValue() {
-  sensors.dhtValueTemp = dht.readTemperature();
-  sensors.dhtValueHumidity = dht.readHumidity();
-  if (isnan(sensors.dhtValueTemp) || isnan(sensors.dhtValueHumidity)) {
-    Serial.println(F("Failed to read from DHT sensor!"));
-    return;
-  } else {
-    D_PRINT("  [getDhtValue] DHT Temperature:");
-    D_PRINTLN(sensors.dhtValueTemp);
-    D_PRINT("  [getDhtValue] DHT Humidity:");
-    D_PRINTLN(sensors.dhtValueHumidity);
-  }
-}
-
-// 18B20 Temperature
-void getTempValue() {
-  temp_sensor.requestTemperatures();
-  sensors.dallasValueTemp = temp_sensor.getTempCByIndex(0);
-  if (isnan(sensors.dallasValueTemp)) {
-    Serial.println(F("Failed to read from 18B20 sensor!"));
-    return;
-  } else {
-    D_PRINT("  [getTempValue] 18B20 Temperature:");
-    D_PRINTLN(sensors.dallasValueTemp);
-  }
-}
-
-
-// water level
-void getWaterState() {
-  bool state_water = digitalRead(LEVEL_PIN);
-  if (state_water == LOW) {
-    D_PRINTLN("  [getWaterState] Water ok");
-    state.water = 1;
-  } else {
-    D_PRINTLN("  [getWaterState] Water low");
-    state.water = 0;
-  }
-}
-
 void readSensors() {
   currentMillis = millis();
   if (currentMillis - previousMillis > sensors.interval) {
     D_PRINTLN("  [readSensors] Reading Sensors");
-    getWaterState();
-    getTempValue();
-    getDhtValue();
+    getWaterState(state);
+    getTempValue(temp_sensor, sensors);
+    getDhtValue(dht, sensors);
     ph.update();
     sensors.ph_value = ph.getPh();
     sensors.ph_value = ph.getAnalogValue();
@@ -568,7 +530,6 @@ void setup() {
   mySwitch.enableTransmit(RF_PIN);
 
   // // initialize dht
-  //pinMode(DHT_PIN, INPUT);
   dht.begin();
 
   // initialize ph
@@ -590,7 +551,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(FLOW_PIN), pulseCounter, FALLING);
 
   // setup fan pwm
-  pinMode(FANPWM1_PIN, OUTPUT);
+  //pinMode(FANPWM1_PIN, OUTPUT);
   //analogWriteFrequency(25000);
   ledcSetup(PWM_FANCHANNEL, PWM_FREQ, PWM_RESOLUTION);
   ledcAttachPin(FANPWM1_PIN, PWM_FANCHANNEL);
@@ -650,7 +611,7 @@ void loop() {
   }
 
   getFlowRate();
-  setPumpState(state);
+  setPumpState();
   setValveState();
   setFanState();
   setLightState();
