@@ -15,6 +15,7 @@
 #include "wifimanager.h"
 #include "ph.h"
 #include "tds.h"
+#include "config.h"
 
 Preferences preferences;
 
@@ -171,13 +172,31 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       if (strcmp(command_item, "calibrate_ph") == 0) {
         int phc = garden_command["value"];
         //calibratePh(phc);
-        ph.calibrate(phc);        
-        notifyClients();
+        ph.calibrate(phc);
+        settings.ph_calibrated = ph.isCalibrated();
+        if(settings.ph_calibrated)
+        {
+          settings.ph_calibration_b = ph.getCalibB();
+          settings.ph_calibration_m = ph.getCalibM();
+          preferences.begin("garden", false);
+          preferences.putFloat("ph_calibration_b", settings.ph_calibration_b);
+          preferences.putFloat("ph_calibration_m", settings.ph_calibration_m);
+          preferences.end();       
+          notifyClients();
+        }
       }
       if (strcmp(command_item, "calibrate_tds") == 0) {
         float tdsc = garden_command["value"];
         tds.calibrate(tdsc);
-        notifyClients(); 
+        settings.tds_calibrated = tds.isCalibrated();
+        if(settings.tds_calibrated)
+        {
+          settings.tds_kvalue = tds.getKvalue();
+          preferences.begin("garden", false);
+          preferences.putFloat("tds_kvalue", settings.tds_kvalue);
+          preferences.end();
+          notifyClients();
+        } 
       }       
     }
     if (strcmp(command_type, "update") == 0) {

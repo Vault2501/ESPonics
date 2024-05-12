@@ -1,6 +1,6 @@
-//#define DEBUG_MAIN
+#define DEBUG
 
-#ifdef DEBUG_MAIN
+#ifdef DEBUG
 #define D_PRINT(x) Serial.print(x)
 #define D_PRINTDEC(x) Serial.print(x, DEC)
 #define D_PRINTLN(x) Serial.println(x)
