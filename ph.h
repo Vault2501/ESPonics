@@ -30,6 +30,7 @@ class Ph
     int getAnalogValue();
     float getCalibB();
     float getCalibM();
+    void update();
     void setCalib(float calib_b, float calib_m);
 
   private:
@@ -38,7 +39,6 @@ class Ph
     float analog2Voltage(float analogValue);
     float voltage2Ph(float voltage, float cal_m, float cal_b);
     void setCalibration(float ph1, float ph2, float phAnalog1, float phAnalog2);
-    void readPh(float ph_calibration_m, float ph_calibration_b);
 
     float ph;
     bool calibrated;

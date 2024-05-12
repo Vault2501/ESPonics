@@ -537,6 +537,7 @@ void readSensors() {
     getDhtValue();
     //getEcValue;
     //getPhValue(settings.ph_calibration_m, settings.ph_calibration_b);
+    ph.update();
     sensors.ph_value = ph.getPh();
     sensors.ph_value = ph.getAnalogValue();
     tds.update();

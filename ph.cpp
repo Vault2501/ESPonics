@@ -51,16 +51,16 @@ bool Ph::isCalibrated() {
   }
 }
 
-void Ph::readPh(float ph_calibration_m, float ph_calibration_b) {
+void Ph::update() {
   this->analog = this->readAnalog(this->sampleSize, this->pin);
   float ph_voltage = this->analog2Voltage(this->analog);
   this->ph = this->voltage2Ph(ph_voltage, this->calibration_m, this->calibration_b);
 
-  D_PH_PRINT("  [Ph::readPh analog]: ");
+  D_PH_PRINT("  [Ph::update analog]: ");
   D_PH_PRINTLN(analog);
-  D_PH_PRINT("  [Ph::readPh voltage]: ");
+  D_PH_PRINT("  [Ph::update voltage]: ");
   D_PH_PRINTLN(ph_voltage);
-  D_PH_PRINT("  [Ph::readPh: ph]: ");
+  D_PH_PRINT("  [Ph::update ph]: ");
   D_PH_PRINTLN(ph);
 }
 
