@@ -1,42 +1,53 @@
 #include "sensors.h"
 
-// DHT Humidity/Temperature
-void getDhtValue(DHT& dht, esp_sensors& sensors) {
-  sensors.dhtValueTemp = dht.readTemperature();
-  sensors.dhtValueHumidity = dht.readHumidity();
-  if (isnan(sensors.dhtValueTemp) || isnan(sensors.dhtValueHumidity)) {
+// DHT Temperature
+float getDhtValueTemp(DHT& dht) {
+  float dhtValueTemp = dht.readTemperature();
+  if (isnan(dhtValueTemp)) {
     Serial.println(F("Failed to read from DHT sensor!"));
-    return;
+    return -1;
   } else {
-    D_SENSOR_PRINT("  [getDhtValue] DHT Temperature:");
-    D_SENSOR_PRINTLN(sensors.dhtValueTemp);
-    D_SENSOR_PRINT("  [getDhtValue] DHT Humidity:");
-    D_SENSOR_PRINTLN(sensors.dhtValueHumidity);
+    D_SENSOR_PRINT("  [getDhtValueTemp] DHT Temperature:");
+    D_SENSOR_PRINTLN(dhtValueTemp);
+    return dhtValueTemp;
+  }
+}
+
+// DHT Humidity
+float getDhtValueHumidity(DHT& dht) {
+  float dhtValueHumidity = dht.readHumidity();
+  if (isnan(dhtValueHumidity)) {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    return -1;
+  } else {
+    D_SENSOR_PRINT("  [getDhtValueHumidity] DHT Humidity:");
+    D_SENSOR_PRINTLN(dhtValueHumidity);
+    return dhtValueHumidity;
   }
 }
 
 // 18B20 Temperature
-void getTempValue(DallasTemperature& temp_sensor, esp_sensors& sensors) {
+float getTempValue(DallasTemperature& temp_sensor) {
   temp_sensor.requestTemperatures();
-  sensors.dallasValueTemp = temp_sensor.getTempCByIndex(0);
-  if (isnan(sensors.dallasValueTemp)) {
+  float dallasValueTemp = temp_sensor.getTempCByIndex(0);
+  if (isnan(dallasValueTemp)) {
     Serial.println(F("Failed to read from 18B20 sensor!"));
-    return;
+    return -1;
   } else {
     D_SENSOR_PRINT("  [getTempValue] 18B20 Temperature:");
-    D_SENSOR_PRINTLN(sensors.dallasValueTemp);
+    D_SENSOR_PRINTLN(dallasValueTemp);
+    return dallasValueTemp;
   }
 }
 
-
 // water level
-void getWaterState(esp_state& state) {
+bool getWaterState() {
   bool state_water = digitalRead(LEVEL_PIN);
   if (state_water == LOW) {
     D_SENSOR_PRINTLN("  [getWaterState] Water ok");
-    state.water = 1;
+    return 1;
   } else {
     D_SENSOR_PRINTLN("  [getWaterState] Water low");
-    state.water = 0;
+    return 0;
   }
 }

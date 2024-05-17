@@ -499,12 +499,20 @@ void readSensors() {
   currentMillis = millis();
   if (currentMillis - previousMillis > sensors.interval) {
     D_PRINTLN("  [readSensors] Reading Sensors");
-    getWaterState(state);
-    getTempValue(temp_sensor, sensors);
-    getDhtValue(dht, sensors);
+    
+    state.water = getWaterState();
+    
+    sensors.dallasValueTemp = getTempValue(temp_sensor);
+
+    sensors.dallasValueTemp = getDhtValueTemp(dht);
+    sensors.dhtValueHumidity = getDhtValueTemp(dht);
+
+    ph.setTemperature(sensors.dallasValueTemp);
     ph.update();
     sensors.ph_value = ph.getPh();
     sensors.ph_analog = ph.getAnalogValue();
+
+    tds.setTemperature(sensors.dallasValueTemp);
     tds.update();
     sensors.tds_value = tds.getTdsValue();
     sensors.tds_analog = tds.getAnalogValue();

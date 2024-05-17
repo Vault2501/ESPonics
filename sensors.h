@@ -17,6 +17,7 @@
 #define D_SENSOR_PRINTLN(x)
 #endif
 
-void getDhtValue(DHT& dht, esp_sensors& sensors);
-void getTempValue(DallasTemperature& temp_sensor, esp_sensors& sensors);
-void getWaterState(esp_state& state);
+float getDhtValueHumidity(DHT& dht);
+float getDhtValueTemp(DHT& dht);
+float getTempValue(DallasTemperature& temp_sensor);
+bool getWaterState();
