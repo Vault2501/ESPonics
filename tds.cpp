@@ -63,6 +63,8 @@ void TDS::update()
   D_TDS_PRINTLN(voltage);
   D_TDS_PRINT("  [TDS::update tdsValue]: ");
   D_TDS_PRINTLN(tdsValue);
+  D_TDS_PRINT("  [TDS::update kValue]: ");
+  D_TDS_PRINTLN(kValue);  
 }
 
 float TDS::getTdsValue()

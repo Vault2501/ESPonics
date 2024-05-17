@@ -1,4 +1,4 @@
-//#define DEBUG_TDS
+#define DEBUG_TDS
 
 #ifdef DEBUG_TDS
 #define D_TDS_PRINT(x) Serial.print(x)
