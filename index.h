@@ -300,6 +300,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     <div class="card">    
       <p class="ph_calibrated">State: <span id="ph_calibrated">%PH_CALIBRATED%</span></p>
       <p class "ph_analog">PH Analog Value: <span id="ph_analog">%PH_ANALOG%</span></p>
+      <p class "ph_calib_b">PH Calibration B: <span id="ph_calib_b">%PH_CALIB_B%</span></p>
+      <p class "ph_calib_m">PH Calibration M: <span id="ph_calib_m">%PH_CALIB_M%</span></p>
 
       <h2>Calibrate pH 4.01</h2>
       <p>Put ph sensor in calibration liquid with ph 4.01 and wait until the value does not change anymore.
@@ -451,6 +453,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('ph_value').innerHTML = garden.ph_value;
     document.getElementById('ph_analog').innerHTML = garden.ph_analog;
     document.getElementById('ph_calibrated').innerHTML = ph_calibrated_display;
+    document.getElementById('ph_calib_b').innerHTML = garden.calib_b;
+    document.getElementById('ph_calib_m').innerHTML = garden.calib_m;
     document.getElementById('tds_value').innerHTML = garden.tds_value;
     document.getElementById('tds_analog').innerHTML = garden.tds_analog;
     document.getElementById('tds_calibrated').innerHTML = tds_calibrated_display;
@@ -586,7 +590,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   function calibrate_tds() {
     garden_command.type = "toggle";
     garden_command.item = "calibrate_tds";
-    garden_command.value = 1412;
+    garden_command.value = 1413;
     const garden_data = JSON.stringify(garden_command);
     websocket.send(garden_data);
   }

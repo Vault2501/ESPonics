@@ -5,8 +5,8 @@ TDS::TDS()
 {
     this->pin = TDS_PIN;
     this->temperature = 25.0;
-    this->aref = TDS_AREF;
-    this->adcRange = TDS_ADCRANGE;
+    this->aref = AREF;
+    this->adcRange = ADCRANGE;
     this->kValue = 1.0;
 }
 
@@ -50,7 +50,7 @@ float TDS::getKvalue()
 
 void TDS::update()
 {
-	this->analogValue = analogRead(this->pin);
+	this->analogValue = analogRead(this->pin);   //2400
 	this->voltage = (float)this->analogValue/this->adcRange*this->aref;
 	this->ecValue=(133.42*this->voltage*this->voltage*this->voltage - 255.86*this->voltage*this->voltage + 857.39*this->voltage)*this->kValue;
 	this->ecValue25  =  this->ecValue / (1.0+0.02*(this->temperature-25.0));  //temperature compensation
@@ -105,7 +105,7 @@ void TDS::calibrate(float calib)
 
   rawECsolution = calib/(float)(TdsFactor);
   this->update();
-  kValue = rawECsolution/(133.42*voltage*voltage*voltage - 255.86*voltage*voltage + 857.39*voltage);
+  kValue = rawECsolution/((133.42*voltage*voltage*voltage - 255.86*voltage*voltage + 857.39*voltage)/(1.0+0.02*(this->temperature-25.0)));
   D_TDS_PRINT("  [TDS::calibrate kValue]: ");
   D_TDS_PRINTLN(kValue);
 }

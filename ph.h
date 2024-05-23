@@ -1,4 +1,4 @@
-//#define DEBUG_PH
+#define DEBUG_PH
 
 #ifdef DEBUG_PH
 #define D_PH_PRINT(x) Serial.print(x)
@@ -50,6 +50,8 @@ class Ph
     int pin;
     float temperature;
     int sampleSize;
+    float aref;
+    float adcRange;
 };  
 
 #endif

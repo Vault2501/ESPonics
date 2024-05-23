@@ -1,4 +1,4 @@
-#define DEBUG_TDS
+//#define DEBUG_TDS
 
 #ifdef DEBUG_TDS
 #define D_TDS_PRINT(x) Serial.print(x)
@@ -40,7 +40,7 @@ class TDS
 
   private:
     int pin;
-    float aref;  // default 5.0V on Arduino UNO
+    float aref;
     float adcRange;
     float temperature;
 

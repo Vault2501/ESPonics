@@ -91,6 +91,10 @@ void notifyClients() {
              + String(settings.ph_calibrated) + "\",\
                \n\t\"ph_analog\": \""
              + String(sensors.ph_analog) + "\",\
+               \n\t\"ph_calib_b\": \""
+             + String(settings.ph_calibration_b) + "\",\
+               \n\t\"ph_calib_m\": \""
+             + String(settings.ph_calibration_m) + "\",\
                \n\t\"tds_value\": \""
              + String(sensors.tds_value) + "\",\
                \n\t\"tds_calibrated\": \""

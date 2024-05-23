@@ -1,4 +1,4 @@
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define D_PRINT(x) Serial.print(x)
@@ -31,6 +31,10 @@
 #define TDS_PIN 35
 #define PH_PIN 36     //A0, VP
 #define LEVEL_PIN 39  //A3. VN
+
+// Board voltage and samplerate
+#define AREF 3.3
+#define ADCRANGE 4095
 
 // dht type
 #define DHTTYPE DHT22
@@ -65,9 +69,9 @@
 #define TDS_KVALUE 1.0
 // PH sample size
 #define PH_SAMPLESIZE 10
-// TDS values
-#define TDS_AREF 3.3
-#define TDS_ADCRANGE 4096
+
+// flow ensor
+#define FLOAT_CALIBRATION 3.5
 
 
 #endif

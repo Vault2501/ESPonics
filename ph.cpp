@@ -12,6 +12,8 @@ Ph::Ph()
   this->calibration_m = PH_CALIBRATION_M;
   this->ph = 7;
   this->sampleSize = PH_SAMPLESIZE;
+  this->aref = AREF;
+  this->adcRange = ADCRANGE;
 }
 
 Ph::~Ph()
@@ -34,7 +36,7 @@ void Ph::setTemperature(float temp)
 }
 
 float Ph::analog2Voltage(float analogValue) {
-  float voltage = (float)analogValue * (3.3 / 4095.0);
+  float voltage = (float)analogValue * (aref / adcRange);
   return voltage;
 }
 
