@@ -8,7 +8,8 @@ esp_settings settings={SCHEDULER_ACTIVE,
                        TDS_CALIBRATED,
                        PH_CALIBRATION_B,
                        PH_CALIBRATION_M,
-                       TDS_KVALUE};
+                       TDS_KVALUE,
+                       FLOAT_CALIBRATION};
 
 esp_state state={1,
                  1,
@@ -29,6 +30,8 @@ esp_sensors sensors = {0,
                        0,
                        0,
                        7,
+                       0,
+                       0,
                        0,
                        0,
                        0,
