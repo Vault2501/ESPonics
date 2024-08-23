@@ -6,8 +6,8 @@ esp_settings settings={SCHEDULER_ACTIVE,
                        FAN1_SPEED,
                        PH_CALIBRATED,
                        TDS_CALIBRATED,
-                       PH_CALIBRATION_B,
-                       PH_CALIBRATION_M,
+                       PH_NEUTRALVOLTAGE,
+                       PH_ACIDVOLTAGE,
                        TDS_KVALUE,
                        FLOAT_CALIBRATION};
 

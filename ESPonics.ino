@@ -14,7 +14,7 @@
 #include "vars.h"
 #include "setup.h"
 #include "wifimanager.h"
-#include "ph.h"
+#include "ph2.h"
 #include "tds.h"
 #include "config.h"
 #include "sensors.h"
@@ -26,7 +26,7 @@ AsyncWebSocket ws("/ws");
 
 DHT dht(DHT_PIN, DHTTYPE);
 
-Ph ph;
+PH ph;
 TDS tds;
 
 OneWire oneWire(TEMP_PIN);
@@ -91,10 +91,10 @@ void notifyClients() {
              + String(settings.ph_calibrated) + "\",\
                \n\t\"ph_analog\": \""
              + String(sensors.ph_analog) + "\",\
-               \n\t\"ph_calib_b\": \""
-             + String(settings.ph_calibration_b) + "\",\
-               \n\t\"ph_calib_m\": \""
-             + String(settings.ph_calibration_m) + "\",\
+               \n\t\"ph_neutralVoltage\": \""
+             + String(settings.ph_neutralVoltage) + "\",\
+               \n\t\"ph_acidVoltage\": \""
+             + String(settings.ph_acidVoltage) + "\",\
                \n\t\"tds_value\": \""
              + String(sensors.tds_value) + "\",\
                \n\t\"tds_calibrated\": \""
@@ -180,17 +180,17 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         int phc = garden_command["value"];
         //calibratePh(phc);
         ph.calibrate(phc);
-        settings.ph_calibrated = ph.isCalibrated();
-        if(settings.ph_calibrated)
-        {
-          settings.ph_calibration_b = ph.getCalibB();
-          settings.ph_calibration_m = ph.getCalibM();
+        //settings.ph_calibrated = ph.isCalibrated();
+        //if(settings.ph_calibrated)
+        //{
+          settings.ph_acidVoltage = ph.getAcidVoltage();
+          settings.ph_neutralVoltage = ph.getNeutralVoltage();
           preferences.begin("garden", false);
-          preferences.putFloat("ph_calibration_b", settings.ph_calibration_b);
-          preferences.putFloat("ph_calibration_m", settings.ph_calibration_m);
+          preferences.putFloat("ph_neutralVoltage", settings.ph_neutralVoltage);
+          preferences.putFloat("ph_acidVoltage", settings.ph_acidVoltage);
           preferences.end();       
           notifyClients();
-        }
+        //}
       }
       if (strcmp(command_item, "calibrate_tds") == 0) {
         float tdsc = garden_command["value"];
@@ -358,7 +358,7 @@ void enableSpray() {
   tOpenValve1.restartDelayed();
   notifyClients();
   tPumpOff.restartDelayed();
-};
+}
 
 void disableSpray() {
   D_PRINT("  [disableSpray] Disabling Spray ");
@@ -371,7 +371,7 @@ void disableSpray() {
   }
   state.valve1 = 1;
   notifyClients();
-};
+}
 
 
 //////////////////////////////////////////////
@@ -512,9 +512,9 @@ void readSensors() {
     sensors.dhtValueHumidity = getDhtValueTemp(dht);
 
     ph.setTemperature(sensors.dallasValueTemp);
-    ph.update();
-    sensors.ph_value = ph.getPh();
-    sensors.ph_analog = ph.getAnalogValue();
+    //ph.update();
+    sensors.ph_value = ph.readPH();
+    sensors.ph_analog = ph.getVoltage();
 
     tds.setTemperature(sensors.dallasValueTemp);
     tds.update();
@@ -581,16 +581,16 @@ void setup() {
   schedule.light_off = preferences.getULong("light_off", LIGHT_OFF);
   schedule.valve1_delay = preferences.getULong("valve1_delay", VALVE1_DELAY);
   settings.scheduler_active = preferences.getBool("scheduler", SCHEDULER_ACTIVE);
-  settings.ph_calibration_b = preferences.getFloat("ph_calibration_b", PH_CALIBRATION_B);
-  settings.ph_calibration_m = preferences.getFloat("ph_calibration_m", PH_CALIBRATION_M);
-  ph.setCalib(settings.ph_calibration_b, settings.ph_calibration_m);
+  settings.ph_neutralVoltage = preferences.getFloat("ph_neutralVoltage", PH_NEUTRALVOLTAGE);
+  settings.ph_acidVoltage = preferences.getFloat("ph_acidVoltage", PH_ACIDVOLTAGE);
+  ph.setCalib(settings.ph_neutralVoltage, settings.ph_acidVoltage);
   settings.tds_kvalue = preferences.getFloat("tds_kvalue", TDS_KVALUE);
   tds.setKvalue(settings.tds_kvalue);
   preferences.end();
 
   // check for calibration
   //settings.ph_calibrated = isCalibrated();
-  settings.ph_calibrated = ph.isCalibrated();
+  //settings.ph_calibrated = ph.isCalibrated();
   settings.tds_calibrated = tds.isCalibrated();
 
   // setup Scheduler intervals for pumps

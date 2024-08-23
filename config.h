@@ -63,8 +63,8 @@
 #define FAN1_SPEED 0
 // Calibration defaults
 #define PH_CALIBRATED false
-#define PH_CALIBRATION_B 0
-#define PH_CALIBRATION_M 1
+#define PH_NEUTRALVOLTAGE 1500.0
+#define PH_ACIDVOLTAGE 2032.44
 #define TDS_CALIBRATED false
 #define TDS_KVALUE 1.0
 // PH sample size

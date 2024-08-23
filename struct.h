@@ -7,8 +7,8 @@ struct esp_settings {
   int fan1_speed;
   bool ph_calibrated;
   bool tds_calibrated;
-  float ph_calibration_b;
-  float ph_calibration_m;
+  float ph_neutralVoltage;
+  float ph_acidVoltage;
   float tds_kvalue;
   float float_calibration;
 };
