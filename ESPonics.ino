@@ -102,7 +102,9 @@ void notifyClients() {
                \n\t\"tds_analog\": \""
              + String(sensors.tds_analog) + "\",\
                \n\t\"water_state\": \""
-             + String(state.water) + "\"\
+             + String(state.water) + "\",\
+               \n\t\"log_message\": \""
+             + String(message.log) + "\"\
                \n}");
 }
 
@@ -180,27 +182,30 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         int phc = garden_command["value"];
         //calibratePh(phc);
         ph.calibrate(phc);
-        //settings.ph_calibrated = ph.isCalibrated();
-        //if(settings.ph_calibrated)
-        //{
+        settings.ph_calibrated = ph.getCalibrated();
+        if(settings.ph_calibrated)
+        {
           settings.ph_acidVoltage = ph.getAcidVoltage();
           settings.ph_neutralVoltage = ph.getNeutralVoltage();
+          settings.ph_calibrated = ph.getCalibrated();
           preferences.begin("garden", false);
           preferences.putFloat("ph_neutralVoltage", settings.ph_neutralVoltage);
           preferences.putFloat("ph_acidVoltage", settings.ph_acidVoltage);
+          preferences.putBool("ph_calibrated", settings.ph_calibrated);
           preferences.end();       
           notifyClients();
-        //}
+        }
       }
       if (strcmp(command_item, "calibrate_tds") == 0) {
         float tdsc = garden_command["value"];
         tds.calibrate(tdsc);
-        settings.tds_calibrated = tds.isCalibrated();
+        settings.tds_calibrated = tds.getCalibrated();
         if(settings.tds_calibrated)
         {
           settings.tds_kvalue = tds.getKvalue();
           preferences.begin("garden", false);
           preferences.putFloat("tds_kvalue", settings.tds_kvalue);
+          preferences.putBool("tde_calibrated", settings.tds_calibrated);
           preferences.end();
           notifyClients();
         } 
@@ -575,23 +580,28 @@ void setup() {
 
   // configure preferences structure for persistent saving
   preferences.begin("garden", true);
+  
   schedule.spray_period = preferences.getULong("spray_period", SPRAY_PERIOD);
   schedule.spray_duration = preferences.getULong("spray_duration", SPRAY_DURATION);
   schedule.light_on = preferences.getULong("light_on", LIGHT_ON);
   schedule.light_off = preferences.getULong("light_off", LIGHT_OFF);
   schedule.valve1_delay = preferences.getULong("valve1_delay", VALVE1_DELAY);
+  
   settings.scheduler_active = preferences.getBool("scheduler", SCHEDULER_ACTIVE);
   settings.ph_neutralVoltage = preferences.getFloat("ph_neutralVoltage", PH_NEUTRALVOLTAGE);
   settings.ph_acidVoltage = preferences.getFloat("ph_acidVoltage", PH_ACIDVOLTAGE);
-  ph.setCalib(settings.ph_neutralVoltage, settings.ph_acidVoltage);
+  settings.ph_calibrated = preferences.getBool("ph_calibrated", false);
   settings.tds_kvalue = preferences.getFloat("tds_kvalue", TDS_KVALUE);
-  tds.setKvalue(settings.tds_kvalue);
+  settings.tds_calibrated = preferences.getBool("tds_calibrated", false);
+  
+  //ph.setNeutralVoltage(settings.ph_neutralVoltage);
+  //ph.setAcidVoltage(settings.ph_acidVoltage);
+  //tds.setKvalue(settings.tds_kvalue);
   preferences.end();
 
-  // check for calibration
-  //settings.ph_calibrated = isCalibrated();
-  //settings.ph_calibrated = ph.isCalibrated();
-  settings.tds_calibrated = tds.isCalibrated();
+  // set calibration state
+  ph.setCalibrated(settings.ph_calibrated);
+  tds.setCalibrated(settings.tds_calibrated);
 
   // setup Scheduler intervals for pumps
   tPump.setInterval(schedule.spray_period * TASK_MILLISECOND);

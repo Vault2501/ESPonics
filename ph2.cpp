@@ -11,6 +11,7 @@ PH::PH()
   this->_aref 	        = AREF;
   this->_adcRange 	    = ADCRANGE;
   this->_sampleSize 	  = PH_SAMPLESIZE;
+  this->_calibrated     = false;
 }
 
 PH::~PH()
@@ -25,50 +26,49 @@ void PH::begin()
 
 void PH::readVoltage()
 {
-  //this->_voltage = analogPHRead(this->_sampleSize)/this->_adcRange*(this->_aref*1000);
-  int analog = analogRead(this->_pin);
-  D_PH_PRINT("  [Ph::readVoltage analog]: ");
-  D_PH_PRINTLN(analog);
-  //this->_voltage = analog / this->_adcRange * (this->_aref*1000);
-  this->_voltage = analog / 4096.0 * 5000;
+     this->_voltage = analogRead(this->_pin) / this->_adcRange * this->_aref;
 }
 
 float PH::readPH()
 {
-  readVoltage();
-  float slope = (7.0-4.0)/((this->_neutralVoltage-1500.0)/3.0 - (this->_acidVoltage-1500.0)/3.0);  // two point: (_neutralVoltage,7.0),(_acidVoltage,4.0)
-  float intercept =  7.0 - slope*(this->_neutralVoltage-1500.0)/3.0;
-  //Serial.print("slope:");
-  //Serial.print(slope);
-  //Serial.print(",intercept:");
-  //Serial.println(intercept);
-  this->_phValue = slope*(this->_voltage-1500.0)/3.0+intercept;  //y = k*x + b
-  D_PH_PRINT("  [Ph::update voltage]: ");
-  D_PH_PRINTLN(this->_voltage);
-  D_PH_PRINT("  [Ph::update ph]: ");
+  this->readVoltage();
+
+  float slope = (7.0 - 4.0) / ((this->_neutralVoltage - 1500.0) / 3.0 - (this->_acidVoltage - 1500.0) / 3.0); // two point: (_neutralVoltage,7.0),(_acidVoltage,4.0)
+  float intercept = 7.0 - slope * (this->_neutralVoltage - 1500.0) / 3.0;
+  this->_phValue = slope * (this->_voltage - 1500.0) / 3.0 + intercept; //y = k*x + b
+  
+  D_PH_PRINT("[readPH]... phValue ");
   D_PH_PRINTLN(this->_phValue);
-  return _phValue;
+  return this->_phValue;
 }
 
 void PH::calibrate(int ph_calib)
 {
   readVoltage();
-  if (ph_calib == 7)
+  //if (ph_calib == 7)
+  if ((this->_voltage > PH_8_VOLTAGE) && (this->_voltage < PH_6_VOLTAGE))
   {
     Serial.println();
     Serial.print(F(">>>Buffer Solution:7.0"));
-    this->_neutralVoltage =  this->_voltage;
+    this->_neutralVoltage = this->_voltage;
+    this->_neutralCalibrated = true;
   }
-  else if (ph_calib == 4)
+  //else if (ph_calib == 4)
+  else if ((this->_voltage > PH_5_VOLTAGE) && (this->_voltage < PH_3_VOLTAGE))
   {
     Serial.println();
     Serial.print(F(">>>Buffer Solution:4.0"));
-    this->_acidVoltage =  this->_voltage;
+    this->_acidVoltage = this->_voltage;
+    this->_acidCalibrated = true;
   } 
   else
   {
     Serial.print("Unknown ph calibration value: ");
     Serial.println(ph_calib);
+  }
+  if ((this->_acidCalibrated == true) && (this->_neutralCalibrated == true))
+  {
+    this->_calibrated = true;
   }
 }
 
@@ -93,9 +93,20 @@ void PH::setPin(int pin)
   this->_pin = pin;
 }
 
-void PH::setCalib(int acidVoltage, int neutralVoltage) {
-  this->_acidVoltage = acidVoltage;
-  this->_neutralVoltage = neutralVoltage;
+void PH::setNeutralVoltage(int voltage) {
+  this->_neutralVoltage = voltage;
+}
+
+void PH::setAcidVoltage(int voltage) {
+  this->_acidVoltage = voltage;
+}
+
+bool PH::getCalibrated() {
+  return this->_calibrated;
+}
+
+void PH::setCalibrated(bool state) {
+  this->_calibrated = state;
 }
 
 void PH::setTemperature(float temp)
@@ -139,4 +150,21 @@ void PH::setTemperature(float temp)
 //       }
 //     }
 //   }
+// }
+
+// float PH::readPH()
+// {
+//   readVoltage();
+//   float slope = (7.0-4.0)/((this->_neutralVoltage-1500.0)/3.0 - (this->_acidVoltage-1500.0)/3.0);  // two point: (_neutralVoltage,7.0),(_acidVoltage,4.0)
+//   float intercept =  7.0 - slope*(this->_neutralVoltage-1500.0)/3.0;
+//   //Serial.print("slope:");
+//   //Serial.print(slope);
+//   //Serial.print(",intercept:");
+//   //Serial.println(intercept);
+//   this->_phValue = slope*(this->_voltage-1500.0)/3.0+intercept;  //y = k*x + b
+//   D_PH_PRINT("  [Ph::update voltage]: ");
+//   D_PH_PRINTLN(this->_voltage);
+//   D_PH_PRINT("  [Ph::update ph]: ");
+//   D_PH_PRINTLN(this->_phValue);
+//   return _phValue;
 // }

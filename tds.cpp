@@ -8,6 +8,7 @@ TDS::TDS()
     this->aref = AREF;
     this->adcRange = ADCRANGE;
     this->kValue = 1.0;
+    this->calibrated = false;
 }
 
 TDS::~TDS()
@@ -87,16 +88,14 @@ void TDS::setKvalue(float KValue)
   this->kValue=KValue;
 }
 
-bool TDS::isCalibrated()
+bool TDS::getCalibrated()
 {
-  if(kValue == 1.0)
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+  return this->calibrated;
+}
+
+void TDS::setCalibrated(bool state)
+{
+  this->calibrated = state;
 }
 
 void TDS::calibrate(float calib)
@@ -108,4 +107,5 @@ void TDS::calibrate(float calib)
   kValue = rawECsolution/((133.42*voltage*voltage*voltage - 255.86*voltage*voltage + 857.39*voltage)/(1.0+0.02*(this->temperature-25.0)));
   D_TDS_PRINT("  [TDS::calibrate kValue]: ");
   D_TDS_PRINTLN(kValue);
+  this->calibrated = true;
 }

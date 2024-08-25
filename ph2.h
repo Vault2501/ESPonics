@@ -30,21 +30,27 @@ public:
   int   getVoltage();
   float getAcidVoltage();
   float getNeutralVoltage();
-  void  setCalib(int acidVoltage, int neutralVoltage);
+  bool  getCalibrated();
+  void  setAcidVoltage(int voltage);
+  void  setNeutralVoltage(int voltage);
+  void  setCalibrated(bool state);
   void  setTemperature(float temp);
   void  sortArray(int *array, int size);
   void  setPin(int pin);
 
 private:
-  int 	 _pin;
-  float  _phValue;
-  float  _acidVoltage;
-  float  _neutralVoltage;
-  float  _voltage;
-  float  _temperature;
-  float  _aref;
-  float  _adcRange;
-  int    _sampleSize;
+  int 	_pin;
+  float _phValue;
+  float _acidVoltage;
+  float _neutralVoltage;
+  float _voltage;
+  float _temperature;
+  float _aref;
+  float _adcRange;
+  int   _sampleSize;
+  bool  _calibrated;
+  bool  _acidCalibrated;
+  bool  _neutralCalibrated;
 };
 
 #endif

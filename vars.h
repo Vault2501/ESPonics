@@ -4,8 +4,8 @@
 esp_settings settings={SCHEDULER_ACTIVE,
                        ACTIVE_PUMP,
                        FAN1_SPEED,
-                       PH_CALIBRATED,
-                       TDS_CALIBRATED,
+                       false,
+                       false,
                        PH_NEUTRALVOLTAGE,
                        PH_ACIDVOLTAGE,
                        TDS_KVALUE,
@@ -36,6 +36,8 @@ esp_sensors sensors = {0,
                        0,
                        0,
                        SENSOR_INTERVAL};
+
+esp_message message = {"Started"};
 
 // Hostname
 //const char* hostname = HOSTNAME;

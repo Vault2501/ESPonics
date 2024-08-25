@@ -45,4 +45,8 @@ struct esp_sensors {
   int interval;
 };
 
+struct esp_message {
+  String log;
+};
+
 #endif

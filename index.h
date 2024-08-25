@@ -191,6 +191,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <button class="tablinks" onclick="openTab(event, 'FansLight')">Fans and Light</button>
     <button class="tablinks" onclick="openTab(event, 'Scheduler')">Scheduler</button>
     <button class="tablinks" onclick="openTab(event, 'Calibrate')">Calibrate</button>
+    <button class="">
   </div>
   
   <div id="Pumps" class="tabcontent">
