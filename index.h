@@ -191,7 +191,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <button class="tablinks" onclick="openTab(event, 'FansLight')">Fans and Light</button>
     <button class="tablinks" onclick="openTab(event, 'Scheduler')">Scheduler</button>
     <button class="tablinks" onclick="openTab(event, 'Calibrate')">Calibrate</button>
-    <button class="">
+    <button class="tablinks" onclick="openTab(event, 'Logs')">Logs</button>
   </div>
   
   <div id="Pumps" class="tabcontent">
@@ -324,9 +324,17 @@ const char index_html[] PROGMEM = R"rawliteral(
     </div>
   </div>
 
+  <div id="Logs" class="tabcontent">
+    <div class="card">
+      <h2>Logs</h2>
+      <p class="esp_logs">Logs<span id="esp_logs"></span></p>
+    </div>
+  <div>
+
 <script>
   var gateway = `ws://${window.location.hostname}:8080/ws`;
   var websocket;
+  const log = new Array();
   var garden_command = {
     type: "unset",
     item: "unset",
@@ -334,6 +342,10 @@ const char index_html[] PROGMEM = R"rawliteral(
   };
 
   window.addEventListener('load', onLoad);
+
+  function isNumber(value) {
+    return typeof value === 'number';
+  }
 
   function openTab(evt, tabName) {
     var i, tabcontent, tablinks;
@@ -366,6 +378,21 @@ const char index_html[] PROGMEM = R"rawliteral(
   function onMessage(event) {
     console.log(event.data);
     var garden = JSON.parse(event.data);
+
+    console.log("log[log.length - 1]: " + log[log.length - 1]);
+    console.log("garden.message_log: " + garden.message_log);
+
+    if (log[log.length - 1] == garden.message_log) {
+      log.push(2);
+    }
+    else if (isNumber(log[log.length - 1])) {
+      log[log.length - 1]++;
+    }
+    else {
+      log.push("<br>");
+      log.push(garden.message_log);
+    }
+
     if (garden.pump1_state == "1"){
       pump1_state_display = "OFF";
     }
@@ -460,6 +487,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('tds_analog').innerHTML = garden.tds_analog;
     document.getElementById('tds_calibrated').innerHTML = tds_calibrated_display;
     document.getElementById('water_state').innerHTML = water_state_display;
+    document.getElementById('esp_logs').innerHTML = log;
   }
   function onLoad(event) {
     initButtons();

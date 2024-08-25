@@ -103,7 +103,7 @@ void notifyClients() {
              + String(sensors.tds_analog) + "\",\
                \n\t\"water_state\": \""
              + String(state.water) + "\",\
-               \n\t\"log_message\": \""
+               \n\t\"message_log\": \""
              + String(message.log) + "\"\
                \n}");
 }
