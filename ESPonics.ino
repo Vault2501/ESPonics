@@ -205,7 +205,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
           settings.tds_kvalue = tds.getKvalue();
           preferences.begin("garden", false);
           preferences.putFloat("tds_kvalue", settings.tds_kvalue);
-          preferences.putBool("tde_calibrated", settings.tds_calibrated);
+          preferences.putBool("tds_calibrated", settings.tds_calibrated);
           preferences.end();
           notifyClients();
         } 
