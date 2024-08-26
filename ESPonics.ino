@@ -26,7 +26,7 @@ AsyncWebSocket ws("/ws");
 
 DHT dht(DHT_PIN, DHTTYPE);
 
-PH ph;
+PH ph(&message.log);
 TDS tds;
 
 OneWire oneWire(TEMP_PIN);
@@ -179,9 +179,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         notifyClients();
       }
       if (strcmp(command_item, "calibrate_ph") == 0) {
-        int phc = garden_command["value"];
-        //calibratePh(phc);
-        ph.calibrate(phc);
+        ph.calibrate();
         settings.ph_calibrated = ph.getCalibrated();
         if(settings.ph_calibrated)
         {
@@ -520,6 +518,8 @@ void readSensors() {
     //ph.update();
     sensors.ph_value = ph.readPH();
     sensors.ph_analog = ph.getVoltage();
+    settings.ph_acidVoltage = ph.getAcidVoltage();
+    settings.ph_neutralVoltage = ph.getNeutralVoltage();
 
     tds.setTemperature(sensors.dallasValueTemp);
     tds.update();

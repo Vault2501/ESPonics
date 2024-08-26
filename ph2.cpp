@@ -1,6 +1,6 @@
 #include "ph2.h"
 
-PH::PH()
+PH::PH(String* logPtr)
 {
   this->_pin		        = PH_PIN;
   this->_temperature    = 25.0;
@@ -12,6 +12,7 @@ PH::PH()
   this->_adcRange 	    = ADCRANGE;
   this->_sampleSize 	  = PH_SAMPLESIZE;
   this->_calibrated     = false;
+  this->_logPtr         = logPtr;
 }
 
 PH::~PH()
@@ -22,11 +23,13 @@ PH::~PH()
 void PH::begin()
 {
   pinMode(this->_pin,INPUT);
+  //*this->_logPtr = "PH::begin: started";
 }
 
 void PH::readVoltage()
 {
      this->_voltage = analogRead(this->_pin) / this->_adcRange * this->_aref;
+     //*this->_logPtr = "PH::readVoltage " + String(this->_voltage);
 }
 
 float PH::readPH()
@@ -39,32 +42,36 @@ float PH::readPH()
   
   D_PH_PRINT("[readPH]... phValue ");
   D_PH_PRINTLN(this->_phValue);
+  D_PH_PRINT("[readPH]... Voltage ");
+  D_PH_PRINTLN(this->_voltage);
   return this->_phValue;
+  //*this->_logPtr = "PH::readPH " + String(this->_phValue);
 }
 
-void PH::calibrate(int ph_calib)
+void PH::calibrate()
 {
   readVoltage();
-  //if (ph_calib == 7)
   if ((this->_voltage > PH_8_VOLTAGE) && (this->_voltage < PH_6_VOLTAGE))
   {
     Serial.println();
     Serial.print(F(">>>Buffer Solution:7.0"));
     this->_neutralVoltage = this->_voltage;
     this->_neutralCalibrated = true;
+    *this->_logPtr = "PH::calibrate - Neutral Voltage: " + String(this->_neutralVoltage);
   }
-  //else if (ph_calib == 4)
   else if ((this->_voltage > PH_5_VOLTAGE) && (this->_voltage < PH_3_VOLTAGE))
   {
     Serial.println();
     Serial.print(F(">>>Buffer Solution:4.0"));
     this->_acidVoltage = this->_voltage;
     this->_acidCalibrated = true;
+    *this->_logPtr = "PH::calibrate - Acid Voltage: " + String(this->_acidVoltage);
   } 
   else
   {
-    Serial.print("Unknown ph calibration value: ");
-    Serial.println(ph_calib);
+    Serial.print("Unknown ph calibration voltage: ");
+    Serial.println(this->_acidVoltage);
+    *this->_logPtr = "PH::calibrate - Voltage out of bounds " + String(this->_voltage);
   }
   if ((this->_acidCalibrated == true) && (this->_neutralCalibrated == true))
   {

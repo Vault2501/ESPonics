@@ -20,9 +20,9 @@
 class PH
 {
 public:
-  PH();
+  PH(String* logPtr);
   ~PH();
-  void  calibrate(int ph_calib);
+  void  calibrate();
   float readPH(); 
   void  begin();
   void  readVoltage();
@@ -51,6 +51,7 @@ private:
   bool  _calibrated;
   bool  _acidCalibrated;
   bool  _neutralCalibrated;
+  String* _logPtr;
 };
 
 #endif
