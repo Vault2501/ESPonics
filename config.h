@@ -74,9 +74,9 @@
 //#define PH_SENSOR_GRAVITY_V2
 
 #ifdef PH_SENSOR_DUPONT
-#define PH_8_VOLTAGE 1700
-#define PH_6_VOLTAGE 1900
-#define PH_5_VOLTAGE 2100
+#define PH_8_VOLTAGE 1500
+#define PH_6_VOLTAGE 1800
+#define PH_5_VOLTAGE 2000
 #define PH_3_VOLTAGE 2310
 #endif
 
