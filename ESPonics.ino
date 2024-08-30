@@ -10,6 +10,8 @@
 #include <ArduinoJson.h>
 #include <Preferences.h>
 #include <ArduinoOTA.h>
+#include <WiFiUdp.h>
+#include <NTPClient.h>
 #include "index.h"
 #include "struct.h"
 #include "vars.h"
@@ -24,6 +26,9 @@ Preferences preferences;
 
 AsyncWebServer server(8080);
 AsyncWebSocket ws("/ws");
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
 
 DHT dht(DHT_PIN, DHTTYPE);
 
@@ -104,6 +109,10 @@ void notifyClients() {
              + String(sensors.tds_analog) + "\",\
                \n\t\"water_state\": \""
              + String(state.water) + "\",\
+               \n\t\"esp_day\": \""
+             + String(message.dayStamp) + "\",\
+               \n\t\"esp_time\": \""
+             + String(message.timeStamp) + "\",\
                \n\t\"message_log\": \""
              + String(message.log) + "\"\
                \n}");
@@ -504,8 +513,8 @@ void getFlowRate() {
 
 
 void readSensors() {
-  currentMillis = millis();
-  if (currentMillis - previousMillis > sensors.interval) {
+  //currentMillis = millis();
+  //if (currentMillis - previousMillis > sensors.interval) {
     D_PRINTLN("  [readSensors] Reading Sensors");
     
     state.water = getWaterState();
@@ -528,10 +537,33 @@ void readSensors() {
     sensors.tds_analog = tds.getAnalogValue();
 
     notifyClients();
-    previousMillis = millis();
-  }
+    //previousMillis = millis();
+  //}
 }
 
+void updateTime() {
+  //currentMillis = millis();
+  //if (currentMillis - previousMillis > sensors.interval) {
+    message.formattedDate = timeClient.getFormattedDate();
+    
+    int splitT = message.formattedDate.indexOf("T");
+    message.dayStamp = message.formattedDate.substring(0, splitT);
+    message.timeStamp = message.formattedDate.substring(splitT+1, message.formattedDate.length()-1);
+
+    //previousMillis = millis();
+  //}
+}
+
+bool trigger(){
+  currentMillis = millis();
+  if (currentMillis - previousMillis > sensors.interval) {
+    D_PRINTLN("trigger");
+    previousMillis = millis();
+    return true;    
+  } else {
+    return false;
+  }
+}
 
 //////////////////////////////////////////////
 /// Main part
@@ -606,6 +638,9 @@ void setup() {
       else if (error == OTA_END_ERROR) Serial.println("End Failed");
     });
 
+  timeClient.begin();
+  timeClient.setTimeOffset(3600); // GMT+1  
+
   // configure preferences structure for persistent saving
   preferences.begin("garden", true);
   
@@ -663,12 +698,16 @@ void loop() {
 
   ArduinoOTA.handle();
 
-  getFlowRate();
-  setPumpState();
-  setValveState();
-  setFanState();
-  setLightState();
-  readSensors();
+  if(trigger) {
+    updateTime();
+    getFlowRate();
+    setPumpState();
+    setValveState();
+    setFanState();
+    setLightState();
+    readSensors();
+    notifyClients();
+  }
 
   //notifyClients();
 }

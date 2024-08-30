@@ -37,7 +37,10 @@ esp_sensors sensors = {0,
                        0,
                        SENSOR_INTERVAL};
 
-esp_message message = {"Started"};
+esp_message message = {"Started",
+                       "undefined",
+                       "undefined",
+                       "undefiend"};
 
 // Hostname
 //const char* hostname = HOSTNAME;

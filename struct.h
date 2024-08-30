@@ -47,6 +47,9 @@ struct esp_sensors {
 
 struct esp_message {
   String log;
+  String formattedDate;
+  String dayStamp;
+  String timeStamp;
 };
 
 #endif
