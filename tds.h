@@ -24,32 +24,34 @@ class TDS
     TDS();
     ~TDS();
 
-    void begin();
-    void update(); //read and calculate
-    void setPin(int pin); 
-    void setTemperature(float temp);  //set the temperature and execute temperature compensation
-    void setAref(float value);  //reference voltage on ADC, default 5.0V on Arduino UNO
-    void setAdcRange(float range);  //1024 for 10bit ADC;4096 for 12bit ADC
+    void  begin();
+    void  update(); //read and calculate
+    void  setPin(int pin); 
+    void  setTemperature(float temp);  //set the temperature and execute temperature compensation
+    void  setAref(float value);  //reference voltage on ADC, default 5.0V on Arduino UNO
+    void  setAdcRange(float range);  //1024 for 10bit ADC;4096 for 12bit ADC
     float getKvalue(); 
-    int getAnalogValue();
+    int   getAnalogValue();
     float getTdsValue();
     float getEcValue();
-    void calibrate(float calib);
-    void setKvalue(float Kvalue);
-    bool isCalibrated();
+    void  calibrate(float calib);
+    void  setKvalue(float Kvalue);
+    bool  getCalibrated();
+    void  setCalibrated(bool state);
 
   private:
-    int pin;
+    int   pin;
     float aref;
     float adcRange;
     float temperature;
 
     float kValue;      // k value of the probe,you can calibrate in buffer solution ,such as 706.5ppm(1413us/cm)@25^C 
-    int analogValue;
+    int   analogValue;
     float voltage;
     float ecValue; //before temperature compensation
     float ecValue25; //after temperature compensation
     float tdsValue;
+    bool  calibrated;
 };
 
 

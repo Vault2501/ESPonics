@@ -33,8 +33,8 @@
 #define LEVEL_PIN 39  //A3. VN
 
 // Board voltage and samplerate
-#define AREF 3.3
-#define ADCRANGE 4095
+#define AREF 3300
+#define ADCRANGE 4096.0
 
 // dht type
 #define DHTTYPE DHT22
@@ -62,13 +62,30 @@
 // Default pwm fan speed (0-100)
 #define FAN1_SPEED 0
 // Calibration defaults
-#define PH_CALIBRATED false
-#define PH_CALIBRATION_B 0
-#define PH_CALIBRATION_M 1
-#define TDS_CALIBRATED false
+//#define PH_CALIBRATED false
+#define PH_NEUTRALVOLTAGE 1500.0
+#define PH_ACIDVOLTAGE 2032.44
+//#define TDS_CALIBRATED false
 #define TDS_KVALUE 1.0
 // PH sample size
 #define PH_SAMPLESIZE 10
+// PH ranges
+#define PH_SENSOR_DUPONT
+//#define PH_SENSOR_GRAVITY_V2
+
+#ifdef PH_SENSOR_DUPONT
+#define PH_8_VOLTAGE 1500
+#define PH_6_VOLTAGE 1800
+#define PH_5_VOLTAGE 2000
+#define PH_3_VOLTAGE 2310
+#endif
+
+#ifdef PH_SENSOR_GRAVITY_V2
+#define PH_8_VOLTAGE 1122
+#define PH_6_VOLTAGE 1478
+#define PH_5_VOLTAGE 1654
+#define PH_3_VOLTAGE 2010
+#endif
 
 // flow ensor
 #define FLOAT_CALIBRATION 3.5

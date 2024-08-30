@@ -9,12 +9,13 @@
 #include <DallasTemperature.h>
 #include <ArduinoJson.h>
 #include <Preferences.h>
+#include <ArduinoOTA.h>
 #include "index.h"
 #include "struct.h"
 #include "vars.h"
 #include "setup.h"
 #include "wifimanager.h"
-#include "ph.h"
+#include "ph2.h"
 #include "tds.h"
 #include "config.h"
 #include "sensors.h"
@@ -26,7 +27,7 @@ AsyncWebSocket ws("/ws");
 
 DHT dht(DHT_PIN, DHTTYPE);
 
-Ph ph;
+PH ph(&message.log);
 TDS tds;
 
 OneWire oneWire(TEMP_PIN);
@@ -91,10 +92,10 @@ void notifyClients() {
              + String(settings.ph_calibrated) + "\",\
                \n\t\"ph_analog\": \""
              + String(sensors.ph_analog) + "\",\
-               \n\t\"ph_calib_b\": \""
-             + String(settings.ph_calibration_b) + "\",\
-               \n\t\"ph_calib_m\": \""
-             + String(settings.ph_calibration_m) + "\",\
+               \n\t\"ph_neutralVoltage\": \""
+             + String(settings.ph_neutralVoltage) + "\",\
+               \n\t\"ph_acidVoltage\": \""
+             + String(settings.ph_acidVoltage) + "\",\
                \n\t\"tds_value\": \""
              + String(sensors.tds_value) + "\",\
                \n\t\"tds_calibrated\": \""
@@ -102,7 +103,9 @@ void notifyClients() {
                \n\t\"tds_analog\": \""
              + String(sensors.tds_analog) + "\",\
                \n\t\"water_state\": \""
-             + String(state.water) + "\"\
+             + String(state.water) + "\",\
+               \n\t\"message_log\": \""
+             + String(message.log) + "\"\
                \n}");
 }
 
@@ -177,17 +180,17 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         notifyClients();
       }
       if (strcmp(command_item, "calibrate_ph") == 0) {
-        int phc = garden_command["value"];
-        //calibratePh(phc);
-        ph.calibrate(phc);
-        settings.ph_calibrated = ph.isCalibrated();
+        ph.calibrate();
+        settings.ph_calibrated = ph.getCalibrated();
         if(settings.ph_calibrated)
         {
-          settings.ph_calibration_b = ph.getCalibB();
-          settings.ph_calibration_m = ph.getCalibM();
+          settings.ph_acidVoltage = ph.getAcidVoltage();
+          settings.ph_neutralVoltage = ph.getNeutralVoltage();
+          settings.ph_calibrated = ph.getCalibrated();
           preferences.begin("garden", false);
-          preferences.putFloat("ph_calibration_b", settings.ph_calibration_b);
-          preferences.putFloat("ph_calibration_m", settings.ph_calibration_m);
+          preferences.putFloat("ph_neutralVoltage", settings.ph_neutralVoltage);
+          preferences.putFloat("ph_acidVoltage", settings.ph_acidVoltage);
+          preferences.putBool("ph_calibrated", settings.ph_calibrated);
           preferences.end();       
           notifyClients();
         }
@@ -195,12 +198,13 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       if (strcmp(command_item, "calibrate_tds") == 0) {
         float tdsc = garden_command["value"];
         tds.calibrate(tdsc);
-        settings.tds_calibrated = tds.isCalibrated();
+        settings.tds_calibrated = tds.getCalibrated();
         if(settings.tds_calibrated)
         {
           settings.tds_kvalue = tds.getKvalue();
           preferences.begin("garden", false);
           preferences.putFloat("tds_kvalue", settings.tds_kvalue);
+          preferences.putBool("tds_calibrated", settings.tds_calibrated);
           preferences.end();
           notifyClients();
         } 
@@ -358,7 +362,7 @@ void enableSpray() {
   tOpenValve1.restartDelayed();
   notifyClients();
   tPumpOff.restartDelayed();
-};
+}
 
 void disableSpray() {
   D_PRINT("  [disableSpray] Disabling Spray ");
@@ -371,7 +375,7 @@ void disableSpray() {
   }
   state.valve1 = 1;
   notifyClients();
-};
+}
 
 
 //////////////////////////////////////////////
@@ -512,9 +516,11 @@ void readSensors() {
     sensors.dhtValueHumidity = getDhtValueTemp(dht);
 
     ph.setTemperature(sensors.dallasValueTemp);
-    ph.update();
-    sensors.ph_value = ph.getPh();
-    sensors.ph_analog = ph.getAnalogValue();
+    //ph.update();
+    sensors.ph_value = ph.readPH();
+    sensors.ph_analog = ph.getVoltage();
+    settings.ph_acidVoltage = ph.getAcidVoltage();
+    settings.ph_neutralVoltage = ph.getNeutralVoltage();
 
     tds.setTemperature(sensors.dallasValueTemp);
     tds.update();
@@ -573,25 +579,57 @@ void setup() {
   // setup WiFiManager
   setupWiFiManager();
 
+  ArduinoOTA.setPassword("admin");
+  ArduinoOTA
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    })
+    .onEnd([]() {
+      Serial.println("\nEnd");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+
   // configure preferences structure for persistent saving
   preferences.begin("garden", true);
+  
   schedule.spray_period = preferences.getULong("spray_period", SPRAY_PERIOD);
   schedule.spray_duration = preferences.getULong("spray_duration", SPRAY_DURATION);
   schedule.light_on = preferences.getULong("light_on", LIGHT_ON);
   schedule.light_off = preferences.getULong("light_off", LIGHT_OFF);
   schedule.valve1_delay = preferences.getULong("valve1_delay", VALVE1_DELAY);
+  
   settings.scheduler_active = preferences.getBool("scheduler", SCHEDULER_ACTIVE);
-  settings.ph_calibration_b = preferences.getFloat("ph_calibration_b", PH_CALIBRATION_B);
-  settings.ph_calibration_m = preferences.getFloat("ph_calibration_m", PH_CALIBRATION_M);
-  ph.setCalib(settings.ph_calibration_b, settings.ph_calibration_m);
+  settings.ph_neutralVoltage = preferences.getFloat("ph_neutralVoltage", PH_NEUTRALVOLTAGE);
+  settings.ph_acidVoltage = preferences.getFloat("ph_acidVoltage", PH_ACIDVOLTAGE);
+  settings.ph_calibrated = preferences.getBool("ph_calibrated", false);
   settings.tds_kvalue = preferences.getFloat("tds_kvalue", TDS_KVALUE);
-  tds.setKvalue(settings.tds_kvalue);
+  settings.tds_calibrated = preferences.getBool("tds_calibrated", false);
+  
+  //ph.setNeutralVoltage(settings.ph_neutralVoltage);
+  //ph.setAcidVoltage(settings.ph_acidVoltage);
+  //tds.setKvalue(settings.tds_kvalue);
   preferences.end();
 
-  // check for calibration
-  //settings.ph_calibrated = isCalibrated();
-  settings.ph_calibrated = ph.isCalibrated();
-  settings.tds_calibrated = tds.isCalibrated();
+  // set calibration state
+  ph.setCalibrated(settings.ph_calibrated);
+  tds.setCalibrated(settings.tds_calibrated);
 
   // setup Scheduler intervals for pumps
   tPump.setInterval(schedule.spray_period * TASK_MILLISECOND);
@@ -614,6 +652,7 @@ void setup() {
 
   // start webserver
   server.begin();
+  ArduinoOTA.begin();
 }
 
 void loop() {
@@ -621,6 +660,8 @@ void loop() {
   if (settings.scheduler_active == 1) {
     ts.execute();
   }
+
+  ArduinoOTA.handle();
 
   getFlowRate();
   setPumpState();
