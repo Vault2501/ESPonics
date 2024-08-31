@@ -79,97 +79,27 @@ const char index_html[] PROGMEM = R"rawliteral(
       box-shadow: 2 2px #CDCDCD;
       transform: translateY(2px);
     }
-    .pump1_state {
+    .state {
       font-size: 1.5rem;
       color:#8c8c8c;
       font-weight: bold;
     }
-    .pump2_state {
+    .sensor {
       font-size: 1.5rem;
       color:#8c8c8c;
       font-weight: bold;
     }
-    .valve1_state {
+    .calibrate {
       font-size: 1.5rem;
       color:#8c8c8c;
       font-weight: bold;
     }
-    .valve2_state {
+    .scheduler {
       font-size: 1.5rem;
       color:#8c8c8c;
       font-weight: bold;
     }
-    .flow_rate {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .flow_quantity {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .spray_period {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .spray_duration {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .fan1_speed {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .dhtValueTemp {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .dallasValueTemp {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .dhtValueHumidity {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .water_state {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .ph_value {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .ph_analog {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .ph_calibrated {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .tds_value {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .tds_analog {
-      font-size: 1.5rem;
-      color:#8c8c8c;
-      font-weight: bold;
-    }
-    .tds_calibrated {
+    .logs {
       font-size: 1.5rem;
       color:#8c8c8c;
       font-weight: bold;
@@ -192,83 +122,85 @@ const char index_html[] PROGMEM = R"rawliteral(
     <button class="tablinks" onclick="openTab(event, 'Scheduler')">Scheduler</button>
     <button class="tablinks" onclick="openTab(event, 'Calibrate')">Calibrate</button>
     <button class="tablinks" onclick="openTab(event, 'Logs')">Logs</button>
+    <span id="esp_day">%DATE%</span>
+    <span id="esp_time">%TIME%</span>
   </div>
   
   <div id="Pumps" class="tabcontent">
     <div class="card">
       <h2>Pump 1</h2>
-      <p class="pump1_state">State: <span id="pump1_state">%PUMP1_STATE%</span></p>
+      <p class="state">State: <span id="pump1_state">%PUMP1_STATE%</span></p>
       <p><button id="pump1_button" class="button">Toggle</button></p>
 
       <h2>Pump 2</h2>
-      <p class="pump2_state">State: <span id="pump2_state">%PUMP2_STATE%</span></p>
+      <p class="state">State: <span id="pump2_state">%PUMP2_STATE%</span></p>
       <p><button id="pump2_button" class="button">Toggle</button></p>
 
       <h2>Valve 1</h2>
-      <p class="valve1_state">State: <span id="valve1_state">%VALVE1_STATE%</span></p>
+      <p class="state">State: <span id="valve1_state">%VALVE1_STATE%</span></p>
       <p><button id="valve1_button" class="button">Toggle</button></p>
 
       <h2>Valve 2</h2>
-      <p class="valve2_state">State: <span id="valve2_state">%VALVE2_STATE%</span></p>
+      <p class="state">State: <span id="valve2_state">%VALVE2_STATE%</span></p>
       <p><button id="valve2_button" class="button">Toggle</button></p>
 
       <h2>Flow Meter</h2>
-      <p class="flow_rate">Flow rate (L/m): <span id="flow_rate">%FLOW_RATE%</span></p>
-      <p class="flow_quantity">Flow Quantity Total (ml): <span id="flow_quantity">%FLOW_QUANTITY%</span></p>
+      <p class="sensor">Flow rate (L/m): <span id="flow_rate">%FLOW_RATE%</span></p>
+      <p class="sensor">Flow Quantity Total (ml): <span id="flow_quantity">%FLOW_QUANTITY%</span></p>
     </div>
   </div>
 
   <div id="Sensors" class="tabcontent">
     <div class="card">
-      <h2>DHT Temperature</h2>
-      <p class="dhtValueTemp">State: <span id="dhtValueTemp">%DHT_TEMP_VALUE%</span></p>
+      <h2>Air Humidity</h2>
+      <p class="sensor"><span id="dhtValueHumidity">%DHT_HUMIDITY_VALUE%</span> percent</p>
 
-      <h2>DHT Humidity</h2>
-      <p class="dhtValueHumidity">State: <span id="dhtValueHumidity">%DHT_HUMIDITY_VALUE%</span></p>
+      <h2>Air Temperature</h2>
+      <p class="sensor"><span id="dhtValueTemp">%DHT_TEMP_VALUE%</span> Celsius</p>
 
-      <h2>Dallas Temperature</h2>
-      <p class="dallasValueTemp">State: <span id="dallasValueTemp">%DALLAS_TEMP_VALUE%</span></p>
+      <h2>Water Temperature</h2>
+      <p class="sensor"><span id="dallasValueTemp">%DALLAS_TEMP_VALUE%</span> Celsius</p>
 
-      <h2>ph Value</h2>
-      <p class="ph_value">State: <span id="ph_value">%PH_VALUE%</span></p>
+      <h2>pH Value</h2>
+      <p class="sensor"><span id="ph_value">%PH_VALUE%</span></p>
 
       <h2>tds Value</h2>
-      <p class="tds_value">State: <span id="tds_value">%TDS_VALUE%</span></p>
+      <p class="sensor"><span id="tds_value">%TDS_VALUE%</span>ppm</p>
 
       <h2>Water State</h2>
-      <p class="water_state">State: <span id="water_state">%WATER_STATE%</span></p>
+      <p class="sensor">State: <span id="water_state">%WATER_STATE%</span></p>
     </div>
   </div>
 
   <div id="FansLight" class="tabcontent">
     <div class="card">
       <h2>Fan 1</h2>
-      <p class="fan1_state">State: <span id="fan1_state">%FAN1_STATE%</span></p>
+      <p class="state">State: <span id="fan1_state">%FAN1_STATE%</span></p>
       <p><button id="fan1_button" class="button">Toggle</button></p>
 
       <h2>Fan 1 Speed</h2>
-      <p class="fan1_speed">
+      <p class="state">
         Fan 1 Speed (0-100): <span id="fan1_speed">%FAN1_SPEED%</span><br>
         New value: <input type="text" id="new_fan1_speed" value="%FAN1_SPEED%">
         <button id="update_fan1_speed_button" class="button">Update</button>
       </p>
 
       <h2>Fan 2</h2>
-      <p class="fan2_state">State: <span id="fan2_state">%FAN2_STATE%</span></p>
+      <p class="state">State: <span id="fan2_state">%FAN2_STATE%</span></p>
       <p><button id="fan2_button" class="button">Toggle</button></p>
 
       <h2>Light</h2>
-      <p class="light_state">State: <span id="light_state">%LIGHT_STATE%</span></p>
+      <p class="state">State: <span id="light_state">%LIGHT_STATE%</span></p>
       <p><button id="light_button" class="button">Toggle</button></p>
 
       <h2>Light Times (h)</h2>
-      <p class="light_on">
+      <p class="state">
         Light On time(h): <span id="light_on">%LIGHT_ON%</span><br>
         New value: <input type="text" id="new_light_on" value="%LIGHT_ON%">
         <button id="update_light_on_button" class="button">Update</button>
       </p>
   
-      <p class="light_off">
+      <p class="state">
         Spray Off time(h): <span id="light_off">%LIGHT_OFF%</span><br>
         New value: <input type="text" id="new_light_off" value="%LIGHT_OFF%">
         <button id="update_light_off_button" class="button">Update</button>
@@ -280,16 +212,16 @@ const char index_html[] PROGMEM = R"rawliteral(
     <div class="card">
 
       <h2>Scheduler</h2>
-      <p class="scheduler_active">State: <span id="scheduler_active">%SCHEDULER_ACTIVE%</span></p>
+      <p class="scheduler">State: <span id="scheduler_active">%SCHEDULER_ACTIVE%</span></p>
       <p><button id="scheduler_button" class="button">Toggle</button></p>
 
       <h2>Spray Period</h2>
-      <p class="spray_period">
+      <p class="scheduler">
         Spray period (ms): <span id="spray_period">%SPRAY_PERIOD%</span><br>
         New value: <input type="text" id="new_spray_period" value="%SPRAY_PERIOD%">
         <button id="update_spray_period_button" class="button">Update</button>
       </p>
-      <p class="spray_duration">
+      <p class="scheduler">
         Spray duration (ms): <span id="spray_duration">%SPRAY_DURATION%</span><br>
         New value: <input type="text" id="new_spray_duration" value="%SPRAY_DURATION%">
         <button id="update_spray_duration_button" class="button">Update</button>
@@ -299,18 +231,18 @@ const char index_html[] PROGMEM = R"rawliteral(
 
   <div id="Calibrate" class="tabcontent">
     <div class="card">    
-      <p class="ph_calibrated">State: <span id="ph_calibrated">%PH_CALIBRATED%</span></p>
-      <p class "ph_analog">PH Analog Value: <span id="ph_analog">%PH_ANALOG%</span></p>
-      <p class "ph_neutralVoltage">PH neutralVoltage: <span id="ph_neutralVoltage">%PH_NEUTRALVOLTAGE%</span></p>
-      <p class "ph_acidVoltage">PH acidVoltage: <span id="ph_acidVoltage">%PH_ACIDVOLTAGE%</span></p>
+      <p class="calibrate">State: <span id="ph_calibrated">%PH_CALIBRATED%</span></p>
+      <p class="calibrate">PH Analog Value: <span id="ph_analog">%PH_ANALOG%</span></p>
+      <p class="calibrate">PH neutralVoltage: <span id="ph_neutralVoltage">%PH_NEUTRALVOLTAGE%</span></p>
+      <p class="calibrate">PH acidVoltage: <span id="ph_acidVoltage">%PH_ACIDVOLTAGE%</span></p>
 
       <h2>Calibrate pH</h2>
       <p>Put ph sensor in calibration liquid with calibration liquid and wait until the value does not change anymore.
          Then click the calibrate button</p>
       <p><button id="calibrate_ph_button" class="button">Calibrate</button></p>
 
-      <p class="tds_calibrated">State: <span id="tds_calibrated">%TDS_CALIBRATED%</span></p>
-      <p class "tds_analog">TDS Analog Value: <span id="tds_analog">%TDS_ANALOG%</span></p>
+      <p class="calibrate">State: <span id="tds_calibrated">%TDS_CALIBRATED%</span></p>
+      <p class="calibrate">TDS Analog Value: <span id="tds_analog">%TDS_ANALOG%</span></p>
 
       <h2>Calibrate tds 1412</h2>
       <p>Put tds sensor in calibration liquid with tds value of 1412 and wait until the value does not change anymore.
@@ -322,7 +254,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   <div id="Logs" class="tabcontent">
     <div class="card">
       <h2>Logs</h2>
-      <p class="esp_logs">Logs<span id="esp_logs"></span></p>
+      <p class="logs">Logs<span id="esp_logs"></span></p>
     </div>
   <div>
 
@@ -483,6 +415,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('tds_calibrated').innerHTML = tds_calibrated_display;
     document.getElementById('water_state').innerHTML = water_state_display;
     document.getElementById('esp_logs').innerHTML = log;
+    document.getElementById('esp_day').innerHTML = garden.esp_day;
+    document.getElementById('esp_time').innerHTML = garden.esp_time;
   }
   function onLoad(event) {
     initButtons();
