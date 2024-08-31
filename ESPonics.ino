@@ -10,8 +10,7 @@
 #include <ArduinoJson.h>
 #include <Preferences.h>
 #include <ArduinoOTA.h>
-#include <WiFiUdp.h>
-#include <NTPClient.h>
+#include "time.h"
 #include "index.h"
 #include "struct.h"
 #include "vars.h"
@@ -26,9 +25,6 @@ Preferences preferences;
 
 AsyncWebServer server(8080);
 AsyncWebSocket ws("/ws");
-
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP);
 
 DHT dht(DHT_PIN, DHTTYPE);
 
@@ -513,51 +509,47 @@ void getFlowRate() {
 
 
 void readSensors() {
-  //currentMillis = millis();
-  //if (currentMillis - previousMillis > sensors.interval) {
-    D_PRINTLN("  [readSensors] Reading Sensors");
-    
-    state.water = getWaterState();
-    
-    sensors.dallasValueTemp = getTempValue(temp_sensor);
+  D_PRINTLN("  [readSensors] Reading Sensors");
+  
+  state.water = getWaterState();
+  
+  sensors.dallasValueTemp = getTempValue(temp_sensor);
 
-    sensors.dallasValueTemp = getDhtValueTemp(dht);
-    sensors.dhtValueHumidity = getDhtValueTemp(dht);
+  sensors.dallasValueTemp = getDhtValueTemp(dht);
+  sensors.dhtValueHumidity = getDhtValueTemp(dht);
 
-    ph.setTemperature(sensors.dallasValueTemp);
-    //ph.update();
-    sensors.ph_value = ph.readPH();
-    sensors.ph_analog = ph.getVoltage();
-    settings.ph_acidVoltage = ph.getAcidVoltage();
-    settings.ph_neutralVoltage = ph.getNeutralVoltage();
+  ph.setTemperature(sensors.dallasValueTemp);
+  //ph.update();
+  sensors.ph_value = ph.readPH();
+  sensors.ph_analog = ph.getVoltage();
+  settings.ph_acidVoltage = ph.getAcidVoltage();
+  settings.ph_neutralVoltage = ph.getNeutralVoltage();
 
-    tds.setTemperature(sensors.dallasValueTemp);
-    tds.update();
-    sensors.tds_value = tds.getTdsValue();
-    sensors.tds_analog = tds.getAnalogValue();
+  tds.setTemperature(sensors.dallasValueTemp);
+  tds.update();
+  sensors.tds_value = tds.getTdsValue();
+  sensors.tds_analog = tds.getAnalogValue();
 
-    notifyClients();
-    //previousMillis = millis();
-  //}
+  notifyClients();
 }
 
 void updateTime() {
-  //currentMillis = millis();
-  //if (currentMillis - previousMillis > sensors.interval) {
-    message.formattedDate = timeClient.getFormattedDate();
-    
-    int splitT = message.formattedDate.indexOf("T");
-    message.dayStamp = message.formattedDate.substring(0, splitT);
-    message.timeStamp = message.formattedDate.substring(splitT+1, message.formattedDate.length()-1);
-
-    //previousMillis = millis();
-  //}
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  char buffer[40];
+  sprintf(buffer, "%2d.%2d.%4d", timeinfo.tm_mday, timeinfo.tm_mon, timeinfo.tm_year + 1900);
+  message.dayStamp = String(buffer);
+  sprintf(buffer, "%2d.%2d.%2d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
+  message.timeStamp = String(buffer);
 }
 
 bool trigger(){
   currentMillis = millis();
   if (currentMillis - previousMillis > sensors.interval) {
-    D_PRINTLN("trigger");
+    D_PRINTLN("triggered");
     previousMillis = millis();
     return true;    
   } else {
@@ -638,9 +630,6 @@ void setup() {
       else if (error == OTA_END_ERROR) Serial.println("End Failed");
     });
 
-  timeClient.begin();
-  timeClient.setTimeOffset(3600); // GMT+1  
-
   // configure preferences structure for persistent saving
   preferences.begin("garden", true);
   
@@ -680,6 +669,8 @@ void setup() {
   // start websocket
   initWebSocket();
 
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
   // setup handler for web access
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send_P(200, "text/html", index_html, processor);
@@ -698,7 +689,7 @@ void loop() {
 
   ArduinoOTA.handle();
 
-  if(trigger) {
+  if(trigger()) {
     updateTime();
     getFlowRate();
     setPumpState();

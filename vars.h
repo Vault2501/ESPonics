@@ -61,3 +61,8 @@ long currentMillis = 0;
 long previousMillis = 0;
 long currentFlowMillis = 0;
 long previousFlowMillis = 0;
+
+// Date and time
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 0;
+const int   daylightOffset_sec = 3600;
