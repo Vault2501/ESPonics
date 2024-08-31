@@ -122,6 +122,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     <button class="tablinks" onclick="openTab(event, 'Scheduler')">Scheduler</button>
     <button class="tablinks" onclick="openTab(event, 'Calibrate')">Calibrate</button>
     <button class="tablinks" onclick="openTab(event, 'Logs')">Logs</button>
+    <span id="date"></span>
+    <span id="time"></span>
   </div>
   
   <div id="Pumps" class="tabcontent">
@@ -413,6 +415,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('tds_calibrated').innerHTML = tds_calibrated_display;
     document.getElementById('water_state').innerHTML = water_state_display;
     document.getElementById('esp_logs').innerHTML = log;
+    document.getElementById('date').innerHTML = garden.esp_date;
+    document.getElementById('time').innerHTML = garden.esp_time;
   }
   function onLoad(event) {
     initButtons();
