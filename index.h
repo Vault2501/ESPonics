@@ -122,8 +122,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     <button class="tablinks" onclick="openTab(event, 'Scheduler')">Scheduler</button>
     <button class="tablinks" onclick="openTab(event, 'Calibrate')">Calibrate</button>
     <button class="tablinks" onclick="openTab(event, 'Logs')">Logs</button>
-    <span id="date"></span>
-    <span id="time"></span>
+    <span id="esp_day">%DATE%</span>
+    <span id="esp_time">%TIME%</span>
   </div>
   
   <div id="Pumps" class="tabcontent">
@@ -153,7 +153,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   <div id="Sensors" class="tabcontent">
     <div class="card">
       <h2>Air Humidity</h2>
-      <p class="sensor"><span id="dhtValueHumidity">%DHT_HUMIDITY_VALUE%</span>%</p>
+      <p class="sensor"><span id="dhtValueHumidity">%DHT_HUMIDITY_VALUE%</span> percent</p>
 
       <h2>Air Temperature</h2>
       <p class="sensor"><span id="dhtValueTemp">%DHT_TEMP_VALUE%</span> Celsius</p>
@@ -232,9 +232,9 @@ const char index_html[] PROGMEM = R"rawliteral(
   <div id="Calibrate" class="tabcontent">
     <div class="card">    
       <p class="calibrate">State: <span id="ph_calibrated">%PH_CALIBRATED%</span></p>
-      <p class "calibrate">PH Analog Value: <span id="ph_analog">%PH_ANALOG%</span></p>
-      <p class "calibrate">PH neutralVoltage: <span id="ph_neutralVoltage">%PH_NEUTRALVOLTAGE%</span></p>
-      <p class "calibrate">PH acidVoltage: <span id="ph_acidVoltage">%PH_ACIDVOLTAGE%</span></p>
+      <p class="calibrate">PH Analog Value: <span id="ph_analog">%PH_ANALOG%</span></p>
+      <p class="calibrate">PH neutralVoltage: <span id="ph_neutralVoltage">%PH_NEUTRALVOLTAGE%</span></p>
+      <p class="calibrate">PH acidVoltage: <span id="ph_acidVoltage">%PH_ACIDVOLTAGE%</span></p>
 
       <h2>Calibrate pH</h2>
       <p>Put ph sensor in calibration liquid with calibration liquid and wait until the value does not change anymore.
@@ -242,7 +242,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       <p><button id="calibrate_ph_button" class="button">Calibrate</button></p>
 
       <p class="calibrate">State: <span id="tds_calibrated">%TDS_CALIBRATED%</span></p>
-      <p class "calibrate">TDS Analog Value: <span id="tds_analog">%TDS_ANALOG%</span></p>
+      <p class="calibrate">TDS Analog Value: <span id="tds_analog">%TDS_ANALOG%</span></p>
 
       <h2>Calibrate tds 1412</h2>
       <p>Put tds sensor in calibration liquid with tds value of 1412 and wait until the value does not change anymore.
@@ -254,7 +254,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   <div id="Logs" class="tabcontent">
     <div class="card">
       <h2>Logs</h2>
-      <p class="logs>Logs<span id="esp_logs"></span></p>
+      <p class="logs">Logs<span id="esp_logs"></span></p>
     </div>
   <div>
 
@@ -415,8 +415,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('tds_calibrated').innerHTML = tds_calibrated_display;
     document.getElementById('water_state').innerHTML = water_state_display;
     document.getElementById('esp_logs').innerHTML = log;
-    document.getElementById('date').innerHTML = garden.esp_date;
-    document.getElementById('time').innerHTML = garden.esp_time;
+    document.getElementById('esp_day').innerHTML = garden.esp_day;
+    document.getElementById('esp_time').innerHTML = garden.esp_time;
   }
   function onLoad(event) {
     initButtons();
