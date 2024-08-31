@@ -540,7 +540,7 @@ void updateTime() {
     return;
   }
   char buffer[40];
-  sprintf(buffer, "%2d.%2d.%4d", timeinfo.tm_mday, timeinfo.tm_mon, timeinfo.tm_year + 1900);
+  sprintf(buffer, "%2d.%2d.%4d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
   message.dayStamp = String(buffer);
   sprintf(buffer, "%2d.%2d.%2d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
   message.timeStamp = String(buffer);

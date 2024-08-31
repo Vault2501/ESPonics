@@ -47,9 +47,12 @@ const char index_html[] PROGMEM = R"rawliteral(
     border-top: none;
     }
     .tab {
-    overflow: hidden;
-    border: 1px solid #ccc;
-    background-color: #f1f1f1;
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+      padding: 15px 50px;
+      font-size: 24px;
+
     }
     .card {
       background-color: #F8F7F9;;
