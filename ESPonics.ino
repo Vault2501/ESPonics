@@ -14,12 +14,12 @@
 #include "index.h"
 #include "struct.h"
 #include "vars.h"
-#include "setup.h"
 #include "wifimanager.h"
 #include "ph2.h"
 #include "tds.h"
 #include "config.h"
 #include "sensors.h"
+#include "helper.h"
 
 Preferences preferences;
 
@@ -515,11 +515,10 @@ void readSensors() {
   
   sensors.dallasValueTemp = getTempValue(temp_sensor);
 
-  sensors.dallasValueTemp = getDhtValueTemp(dht);
-  sensors.dhtValueHumidity = getDhtValueTemp(dht);
+  sensors.dhtValueTemp = getDhtValueTemp(dht);
+  sensors.dhtValueHumidity = getDhtValueHumidity(dht);
 
   ph.setTemperature(sensors.dallasValueTemp);
-  //ph.update();
   sensors.ph_value = ph.readPH();
   sensors.ph_analog = ph.getVoltage();
   settings.ph_acidVoltage = ph.getAcidVoltage();
@@ -529,22 +528,20 @@ void readSensors() {
   tds.update();
   sensors.tds_value = tds.getTdsValue();
   sensors.tds_analog = tds.getAnalogValue();
-
-  notifyClients();
 }
 
-void updateTime() {
-  struct tm timeinfo;
-  if(!getLocalTime(&timeinfo)){
-    Serial.println("Failed to obtain time");
-    return;
-  }
-  char buffer[40];
-  sprintf(buffer, "%2d.%2d.%4d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-  message.dayStamp = String(buffer);
-  sprintf(buffer, "%2d.%2d.%2d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
-  message.timeStamp = String(buffer);
-}
+// void updateTime() {
+//   struct tm timeinfo;
+//   if(!getLocalTime(&timeinfo)){
+//     Serial.println("Failed to obtain time");
+//     return;
+//   }
+//   char buffer[40];
+//   sprintf(buffer, "%2d.%2d.%4d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+//   message.dayStamp = String(buffer);
+//   sprintf(buffer, "%2d.%2d.%2d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
+//   message.timeStamp = String(buffer);
+// }
 
 bool trigger(){
   currentMillis = millis();
@@ -589,16 +586,11 @@ void setup() {
   flowRate = 0.0;
   flowMilliLitres = 0;
   totalMilliLitres = 0;
-  //previousMillis = 0;
   attachInterrupt(digitalPinToInterrupt(FLOW_PIN), pulseCounter, FALLING);
 
   // setup fan pwm
-  //pinMode(FANPWM1_PIN, OUTPUT);
-  //analogWriteFrequency(25000);
   ledcSetup(PWM_FANCHANNEL, PWM_FREQ, PWM_RESOLUTION);
   ledcAttachPin(FANPWM1_PIN, PWM_FANCHANNEL);
-  //ledcAttach(FANPWM1_PIN, PWM_FREQ, PWM_RESOLUTION);
-  //ledcAttachChannel(FANPWM1_PIN, PWM_FREQ, PWM_RESOLUTION, PWM_FANCHANNEL);
 
   // setup WiFiManager
   setupWiFiManager();
@@ -646,9 +638,6 @@ void setup() {
   settings.tds_kvalue = preferences.getFloat("tds_kvalue", TDS_KVALUE);
   settings.tds_calibrated = preferences.getBool("tds_calibrated", false);
   
-  //ph.setNeutralVoltage(settings.ph_neutralVoltage);
-  //ph.setAcidVoltage(settings.ph_acidVoltage);
-  //tds.setKvalue(settings.tds_kvalue);
   preferences.end();
 
   // set calibration state
@@ -690,7 +679,8 @@ void loop() {
   ArduinoOTA.handle();
 
   if(trigger()) {
-    updateTime();
+    message.timeStamp = updateTime();
+    message.dayStamp = updateDate();
     getFlowRate();
     setPumpState();
     setValveState();
