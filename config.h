@@ -88,7 +88,7 @@
 #endif
 
 // flow ensor
-#define FLOAT_CALIBRATION 3.5
+#define FLOW_CALIBRATION 4.5
 
 
 #endif

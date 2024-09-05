@@ -12,7 +12,7 @@ esp_settings settings={SCHEDULER_ACTIVE,
                        PH_NEUTRALVOLTAGE,
                        PH_ACIDVOLTAGE,
                        TDS_KVALUE,
-                       FLOAT_CALIBRATION};
+                       FLOW_CALIBRATION};
 
 esp_state state={1,
                  1,
@@ -37,8 +37,10 @@ esp_sensors sensors = {0,
                        0,
                        0,
                        0,
+                       0.0,
+                       SENSOR_INTERVAL,
                        0,
-                       SENSOR_INTERVAL};
+                       0};
 
 esp_message message = {"Started",
                        "undefined",
@@ -52,12 +54,8 @@ esp_message message = {"Started",
 bool light_toggle = 1;
 
 // Flow meter vars
-float calibrationFactor = 4.5;
 volatile byte pulseCount;
 byte pulse1Sec = 0;
-float flowRate;
-unsigned int flowMilliLitres;
-unsigned long totalMilliLitres;
 
 // Timing
 long currentMillis = 0;

@@ -10,7 +10,7 @@ struct esp_settings {
   float ph_neutralVoltage;
   float ph_acidVoltage;
   float tds_kvalue;
-  float float_calibration;
+  float flow_calibration;
 };
 
 struct esp_state {
@@ -43,6 +43,8 @@ struct esp_sensors {
   volatile byte flow_count;
   float flow_rate;
   int interval;
+  unsigned int flowMilliLiters;
+  unsigned long totalMilliLiters;
 };
 
 struct esp_message {
