@@ -56,6 +56,8 @@ bool light_toggle = 1;
 // Flow meter vars
 volatile byte pulseCount;
 byte pulse1Sec = 0;
+unsigned long flow_cal_measured = 0;
+
 
 // Timing
 long currentMillis = 0;

@@ -77,6 +77,8 @@ void notifyClients() {
              + String(sensors.flow_rate) + "\",\
                \n\t\"flow_quantity\": \""
              + String(sensors.flowMilliLiters) + "\",\
+               \n\t\"flow_total\": \""
+             + String(sensors.totalMilliLiters) + "\",\
                \n\t\"spray_period\": \""
              + String(schedule.spray_period) + "\",\
                \n\t\"spray_duration\": \""
@@ -213,7 +215,11 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
           preferences.end();
           notifyClients();
         } 
-      }       
+      }    
+      if (strcmp(command_item, "calibrate_flow") == 0) {
+        Serial.println("Calibrating flow");
+        flow_cal_measured = calibrateFlow();
+      }   
     }
     if (strcmp(command_type, "update") == 0) {
       if (strcmp(command_item, "light_on") == 0) {
@@ -251,6 +257,18 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         tPumpOff.setInterval(schedule.spray_duration * TASK_MILLISECOND);
         settings.scheduler_active = 1;
         notifyClients();
+      }
+      if (strcmp(command_item, "flow_amount") == 0) {
+        unsigned int temp = garden_command["value"];
+        settings.flow_calibration = (temp / flow_cal_measured);
+        Serial.print("settings.flow_calibration: ");
+        Serial.println(settings.flow_calibration);
+        //preferences.begin("garden", false);
+        //preferences.putULong("spray_duration", schedule.spray_duration);
+        //preferences.end();
+        //tPumpOff.setInterval(schedule.spray_duration * TASK_MILLISECOND);
+        //settings.scheduler_active = 1;
+        //notifyClients();
       }
       if (strcmp(command_item, "fan1_speed") == 0) {
         settings.fan1_speed = garden_command["value"];
@@ -469,24 +487,27 @@ void IRAM_ATTR pulseCounter() {
   pulseCount++;
 }
 
-void calibrateFlow() {
+unsigned long calibrateFlow() {
   // get current amount
   unsigned long calibStartMilliLiters = sensors.totalMilliLiters;
 
   // turn on pump
   state.pump1 = 0;
+  state.valve2 = 0;
 
-  // wait 60 sec
-  delay(60000);
+  // wait 30 sec
+  delay(30000);
 
   // turn off pump
   state.pump1 = 1;
+  state.valve2 = 1;
 
   // calculate measured milliliters
   unsigned long calibMeasurement = sensors.totalMilliLiters - calibStartMilliLiters;
-  
+  Serial.print("calibMeasurement: ");
+  Serial.println(calibMeasurement);
   // use  user provided amount that really was pumped to calculate calibration factor
-
+  return 2*calibMeasurement;
 }
 
 void getFlowRate() {

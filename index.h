@@ -149,7 +149,8 @@ const char index_html[] PROGMEM = R"rawliteral(
 
       <h2>Flow Meter</h2>
       <p class="sensor">Flow rate (L/m): <span id="flow_rate">%FLOW_RATE%</span></p>
-      <p class="sensor">Flow Quantity Total (ml): <span id="flow_quantity">%FLOW_QUANTITY%</span></p>
+      <p class="sensor">Flow Quantity last (ml): <span id="flow_quantity">%FLOW_QUANTITY%</span></p>
+      <p class="sensor">Flow Quantity Total (ml): <span id="flow_total">%FLOW_TOTAL%</span></p>
     </div>
   </div>
 
@@ -250,7 +251,21 @@ const char index_html[] PROGMEM = R"rawliteral(
       <h2>Calibrate tds 1412</h2>
       <p>Put tds sensor in calibration liquid with tds value of 1412 and wait until the value does not change anymore.
          Then click the calibrate button</p>
-      <p><button id="calibrate_tds_button" class="button">Calibrate</button></p>  
+      <p><button id="calibrate_tds_button" class="button">Calibrate</button></p>
+
+      <p class="calibrate">State: <span id="flow_calibrated">%FLOW_CALIBRATED%</span></p>
+      <p class="calibrate">Measured amount: <span id="flow_rate">%FLOW_RATE_MINUTE%</span></p>
+
+      <h2>Calibrate flow</h2>
+      <p>Put a measuring cup at the outlet hose and open the outlet valve. The system will pump for 10 seconds.
+         Afterwards, enter meassured value (in ml) into the meassured field</p>
+      <p><button id="calibrate_flow_button" class="button">Calibrate</button></p>
+
+      <p class="calibrate">
+        Amount pumped(ml): <input type="text" id="new_flow_amount" value="">
+        <button id="update_flow_amount_button" class="button">Update</button>
+      </p>
+
     </div>
   </div>
 
@@ -389,6 +404,13 @@ const char index_html[] PROGMEM = R"rawliteral(
     else {
       tds_calibrated_display = "UNCALIBRATED";
     }
+    if (garden.flow_calibrated == true) {
+      flow_calibrated_display = "CALIBRATED";
+    }
+    else {
+      flow_calibrated_display = "UNCALIBRATED";
+    }
+    
     document.getElementById('pump1_state').innerHTML = pump1_state_display;
     document.getElementById('pump2_state').innerHTML = pump2_state_display;
     document.getElementById('valve1_state').innerHTML = valve1_state_display;
@@ -397,12 +419,13 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('fan1_speed').innerHTML = garden.fan1_speed;
     document.getElementById('fan2_state').innerHTML = fan2_state_display;
     document.getElementById('light_state').innerHTML = light_state_display;
-    document.getElementById('flow_quantity').innerHTML = garden.flow_quantity;
     document.getElementById('light_on').innerHTML = garden.light_on;
     document.getElementById('light_off').innerHTML = garden.light_off;
     document.getElementById('scheduler_active').innerHTML = scheduler_active_display;
     document.getElementById('flow_rate').innerHTML = garden.flow_rate;
     document.getElementById('flow_quantity').innerHTML = garden.flow_quantity;
+    document.getElementById('flow_total').innerHTML = garden.flow_total;
+    document.getElementById('flow_calibrated').innerHTML = flow_calibrated_display;
     document.getElementById('spray_period').innerHTML = garden.spray_period;
     document.getElementById('spray_duration').innerHTML = garden.spray_duration;
     document.getElementById('dhtValueTemp').innerHTML = garden.dhtValueTemp;
@@ -441,6 +464,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     document.getElementById('update_spray_duration_button').addEventListener('click', update_spray_duration);
     document.getElementById('calibrate_ph_button').addEventListener('click', calibrate_ph);
     document.getElementById('calibrate_tds_button').addEventListener('click', calibrate_tds);
+    document.getElementById('calibrate_flow_button').addEventListener('click', calibrate_flow);
+    document.getElementById('update_flow_amount_button').addEventListener('click', update_flow_amount);
   }
   function toggle_pump1() {
     garden_command.type = "toggle";
@@ -544,6 +569,20 @@ const char index_html[] PROGMEM = R"rawliteral(
     garden_command.type = "toggle";
     garden_command.item = "calibrate_tds";
     garden_command.value = 1413;
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function calibrate_flow() {
+    garden_command.type = "toggle";
+    garden_command.item = "calibrate_flow";
+    garden_command.value = "";
+    const garden_data = JSON.stringify(garden_command);
+    websocket.send(garden_data);
+  }
+  function update_flow_amount() {
+    garden_command.type = "update";
+    garden_command.item = "flow_amount";
+    garden_command.value = document.getElementById("new_flow_amount").value
     const garden_data = JSON.stringify(garden_command);
     websocket.send(garden_data);
   }
